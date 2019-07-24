@@ -1,0 +1,336 @@
+/*ボタン関連*/
+
+#back-button{
+  background-color: red;
+  width: 19vmin;
+  height: 3vmax;
+  font-size: 3.7vmin;
+  margin-left:auto;
+  margin-right: auto;
+}
+
+#tutorial-button{
+  padding: 1.5%;
+  text-align:center;
+  margin-left:auto;
+  margin-right: auto;
+}
+
+#push-button{
+  padding: 1.5%;
+  width: 40vmin;
+  height: 12vmin;
+  font-size: 4vmin;
+  margin-left:auto;
+  margin-right: auto; 
+}
+
+#push-button2{
+  padding: 1.5%;
+  width: 40vmin;
+  height: 12.5vmin;
+  font-size: 4vmin;
+  margin-left:auto;
+  margin-right: auto;
+}
+
+#mini-button{
+  background-color:blue;
+  padding: 1%;
+  width: 20vmin;
+  max-width: 30%;
+  height: 7vmin;
+  max-height: 5%;
+  font-size: 3vmin; 
+}
+
+#page4_push-button{
+  background-color:blue;
+  padding: 1%;
+  text-align: center;
+  font-size:4vmin;
+  width: 40vmin;
+  height: 10.5vmin;
+  margin-left:auto;
+  margin-right: auto;
+}
+
+#timeup_button{
+  width: 190px;
+  height: 50px;
+  margin-left:auto;
+  margin-right: auto;
+}
+
+#right-button{
+  background-color:blue;
+  font-size: 3vmin;
+  text-align: center;
+  width: 18vmin;
+  height: 3vmax;
+  margin-left:auto;
+  margin-right: auto;
+}
+
+#bluebutton{
+  background-color:blue;
+  padding: 1.5%;
+  width: 40vmin;
+  height: 12vmin;
+  font-size: 4vmin;
+  margin-left:auto;
+  margin-right: auto; 
+}
+
+#blueButton2{
+  background-color:blue;
+  margin-left:auto;
+  margin-right: auto;
+  /*text-align-last: justify;
+  vertical-align: middle;*/
+}
+#push-button_page3_change{
+  width: 150px;
+  height: 50px;
+  background-color:blue;
+  margin-left:auto;
+  margin-right: auto;
+}
+
+#page3_reset{
+  background-color:blue;
+  padding: 0.2vmin;
+  font-size:3.5vmin;
+  width: 32.5vmin;
+  height: 5vmax;
+  margin-left:auto;
+  margin-right: auto;
+}
+
+#timeup_button{
+  padding: 1%;
+  background-color:blue;
+}
+
+#start{
+background-color:blue;
+}
+
+#stop{
+background-color:blue;
+}
+
+#rset{
+background-color:blue;
+}
+/*ボタン関連ここまで*/
+
+#name{
+  padding: 1.5%;
+  width: 44vmin;
+  max-width: 50%;
+  height: 2.5vmin;
+  font-size:4.5vmin; 
+
+}
+
+#title{
+  width: 90%;
+}
+#pagecolor3{
+  background-color:  black;
+}
+
+.page4_img{
+    float:left;
+    margin-right:4vmin;
+    width: 45vmin;
+    height: 55vmin;
+}
+
+#right{
+    text-align: right;
+}
+
+.player{
+    margin-top: 15px;
+    margin-left: 10%;
+    width: 43vmin;
+    height:43vmin;
+}
+.page4_yakusyku{
+    overflow: hidden;
+    
+}
+
+
+.murabito{
+/*    background: red;
+*/
+  background-color:rgba(255, 255, 255, 0.55);
+    padding: 10px;
+    overflow: hidden;
+}
+
+.bousyoku{
+  background-color:rgba(255, 255, 255, 0.55);
+}
+
+.CitizenSide{
+    font-size: 23px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.WolfSide{
+    font-size: 23px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.YakusyokuSenter{
+  text-align:center;
+  margin: 1vmin;
+}
+
+#textset{
+  font-size:3.3vmin;
+}
+.page4_midasi{
+    font-size: 4.8min;
+}
+
+/*#rist{
+    
+    background-color: gray;
+    float: left;
+}*/
+
+/*.page4_num{
+    background-color: blue;
+    color: white;
+    float: right;
+}*/
+
+
+.media {
+    background: #FFF;
+    padding: 10px;
+    overflow: hidden;
+}
+.media__image {
+    float: left;
+    margin-right: 10px;
+}
+
+img.change{
+    width:8.5vmin;
+    height:8.5vmin;
+}
+
+.media__summary {
+    overflow: hidden;
+}
+.media__heading {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.image{
+    max-width: 50%;
+    margin: 0 auto;
+}
+
+#red{
+    color: red;
+}
+
+h2{
+  background-color:rgba(255, 255, 255, 0.55);
+  }
+
+.textZone{
+    padding-right:8%;
+    padding-left: 8%;
+    font-size:3.16vmin;
+    color: black;
+    
+}
+
+.skeleton{
+  background-color:rgba(255, 255, 255, 0.55);
+}
+
+.tutorial{
+  font-size:3.35vmin;
+  padding:5vmin;
+}
+
+#futosi{
+  font-weight:bold;
+  font-size:3.5vmin;
+}
+
+#tutorial_TB{
+  padding:1.5vmin;
+}
+
+#namelist_page8{
+    background-color:rgba(255, 255, 255, 0.55);
+    font-size: 6.2vmin;
+}
+
+
+.testimg{
+  font-size: 5px;
+}
+#nightset{
+   background-color:rgba(255, 255, 255, 0.55);
+    font-size:6.16vmin;
+}
+#morningset{
+     background-color:rgba(255, 255, 255, 0.55);
+    font-size:6.16vmin;
+}
+#default{
+    background-color:rgba(255, 255, 255, 0.55);
+    font-size:6.16vmin;
+}
+
+#background_image{
+
+  /* 表示するコンテナの大きさに基づいて、背景画像を調整 */
+  background-size: 100% 100%;
+   
+  /* 背景画像が読み込まれる前に表示される背景のカラー */
+  background-color: #464646;
+}
+
+#page17_name{
+  color: red;
+  background-color: white;
+  font-size: 5.5vmin;
+}
+
+#description{
+  background-color: white;
+}
+
+.radio_image{
+  width: 43vmin;
+  height: 43vmin;
+}
+
+.radio {
+	display: none;
+}
+
+.radio + .radio_image {
+	border: 3px #ffffff solid;
+	background-color: #ffffff;
+}
+.radio:checked + .radio_image {
+	border: 3px #ff0000 solid;
+	background-color: #ffeeee;
+}

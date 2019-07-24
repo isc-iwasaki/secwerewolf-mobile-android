@@ -1,0 +1,2514 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: https://ssl.gstatic.com; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+  <script src="components/loader.js"></script>
+  <script src="lib/onsenui/js/onsenui.min.js"></script>
+<script src="jquery.min.js"></script>
+<script src="js/dialog.js"></script>
+<script type="text/javascript" src="jquery.balloon.min.js"></script>
+<script src="js/LocalStorage.js"></script>
+
+  <link rel="stylesheet" href="components/loader.css">
+  <link rel="stylesheet" href="lib/onsenui/css/onsenui.css">
+  <link rel="stylesheet" href="lib/onsenui/css/onsen-css-components.css">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="timer.js"></script>
+
+  <script>
+//メッセージウィンドウ設定
+var notifyAlert = function(title,msg) {
+  ons.notification.alert({
+    message: msg,
+    title: title
+  });
+};
+
+var notifyConfirm = function(title,msg) {
+  return(ons.notification.confirm({
+    message: msg,
+    title: title
+  }));
+};
+
+    // Page init event
+    var x=0;
+    var names=[];       //名前配列
+    var murabito_num = 0;       //初期ノーティフィケーションの人数
+    var bousyoku_num = 1;       //汚職者人数
+
+    //追加↓
+    var uranai_num = 0;//フォレンジックエンジニアの人数
+    var reibai_num = 0;//リサーチャーの人数
+    var kisi_num = 0;//コマンダーの人数
+    var kyoujin_num = 0;//ブラックハットハッカーの人数
+    //↑
+
+    var night=1;        //夜のターン数
+    var page6_name=0;   //夜の確認時のループ用
+    //0=汚職者　1=ノーティフィケーション　2=魔導士 3=死霊術氏　4=剣聖
+    //var job=[0,1,2,3,4];        //職種配列
+
+    var jobnames=[];//職種名
+    var job = []; //職種配列
+    var jobnum = [0,0,0,0,0,0];
+
+    //var Pjob=[];        //プレイヤーの職種配列
+    var p_num=0;    //役職ごとのページを表示させるための番号
+    var gisei=0;  //犠牲者の名前を一時的に入れる変数
+    var ded=[];  //死んだ人の判別用配列
+    var rdname=0;   //12pageで表示させるキーパー名表示用
+    var m_touhyou=[];//ノーティフィケーション怪しい人投票用の配列
+    var kisi=[];//コマンダー判定用の配列
+
+    var j_touhyou=[];//汚職者投票用の配列
+    var j_random=[];//汚職者の投票値が同値だった場合のランダム出力用
+    var page12_A = 0;//ページ12に表示させる文を判別させる変数
+
+    var satugai_count=[];
+    var AA = 0;         //殺害投票ループ用 兼　死者をスキップする用
+    var keltuka = [];   //殺害投票結果用
+    var S =0;           //殺害投票結果用ループ
+    var touhyou_ded = 0;//説明が難しいので省略
+    var gamehantei = 0;
+    var murabito_touhyou_keltuka =[];
+    var W= 0;
+
+    var Cntcitizen = 0;     //シーサート人数カウント用
+    var Cntwolf = 0;        //汚職者人数カウント用
+    var Cntmadman = 0;      //ブラックハットハッカー人数カウント用
+    var Wolfbox = [];       //汚職者の番地取得用配列
+    var Citizenbox = [];    //シーサートの番地取得用配列
+    var Madmanbox = [];        //ブラックハットハッカーの番地取得用配列
+
+    var count = 180;//カウントダウンの数字を格納する変数
+    var min = 0;//残り時間「分」を格納する変数
+    var sec = 0;//残り時間「秒」を格納する変数
+    var stp = null; //setInerval・clearInervalを制御する変数
+
+    var media = null;
+    var mediaTimer = null;
+    var srcFile = "alerm1.mp3";
+
+    var Fortune_switch = 1; //初夜占いON　OFFの判断用
+
+    var save_on = 0;
+
+    var Pname = 0;
+
+    var imgchange =1;
+
+    var timerUseFlg = false;
+
+     var escape_name = 0;
+
+    //デバイスのバックボタン無効
+    ons.ready(function() {
+      ons.disableDeviceBackButtonHandler();
+    });
+
+    async function testbutton(){
+        count = 180;
+        //await document.querySelector('#navigator').pushPage('page2.html');
+        await document.querySelector('#navigator').replacePage('page11.html',{ animation: "fade" });
+        count_start();
+    }
+
+    //var namelist = "";
+    //onTransitionEnd
+
+    //プレイヤーセット画面への移動
+    async function redraw_page3() {
+        await document.querySelector('#navigator').pushPage('page3.html',{ animation: "fade" });
+        for(var i=0; i<x;i++){
+            var hoge = document.createElement("div");
+
+            hoge.addEventListener("click", function(event) {
+                answer=confirm(event.target.textContent + "を削除しますか？");
+                if(answer==true){
+                    _delete_child_element(event);
+                    }
+                }, false);
+
+            hoge.id = "name_" + i;
+            hoge.innerHTML = names[i];
+            document.getElementById("namelist_page8").appendChild(hoge);
+
+        }
+    }
+
+    //名前登録
+    function nameset() {
+        //Pname = document.getElementById("name").value;
+            names.push(escape_name);
+            document.getElementById("name").value = "";
+            //namelist += names[x];
+            var hoge = document.createElement("div");
+
+                //プレイヤー選択削除
+                hoge.addEventListener("click", function(event) {
+
+                  promise=notifyConfirm("プレイヤー削除",event.target.textContent + " を削除しますか？");
+                  promise
+                    .then((result) => {
+                      if(result == 0 || result == -1){
+                        // cancel時の処理
+                      } else {
+                        // OK時の処理
+                        _delete_child_element(event);
+                      }
+                    })
+                    .catch((error) => {
+                      notifyAlert('エラー','error');
+                    });
+
+                }, false);
+
+
+            hoge.id = "name_" + x;
+            hoge.innerHTML = names[x];
+            document.getElementById("namelist_page8").appendChild(hoge);
+            x=x+1;
+            //Pname.innerText = document.forms.form1.textBox1.value;
+            //target.innerText = document.form1.textBox1.value;//これでもOK
+    }
+
+    //page3のプレイヤー名を消す
+    var _delete_child_element = function (event){
+        var dom_obj_id = document.getElementById(event.target.id);
+        var dom_obj_id_num = event.target.id.toString().replace("name_", "");
+        //alert(event.target.id.toString().slice(0, event.target.id.toString().indexOf("_")));
+        names.splice(dom_obj_id_num, 1);
+
+        //while (dom_obj_id){ dom_obj_id.removeChild(dom_obj_id.firstChild)};
+        dom_obj_id.remove();
+        for (var i = 0; i < x; i++){
+            if (names[i] == null){
+                names[i] = names[i + 1];
+                names.pop();
+                x--;
+                }
+            }
+    };
+    //登録プレイヤー全削除
+    function reset(){
+        if(x != 0){
+            promise=notifyConfirm("プレイヤー削除","全プレイヤーを削除しますか？");
+            promise
+              .then((result) => {
+                if(result == 0 || result == -1){
+                  // cancel時の処理
+                } else {
+                  //alert(names);
+                  names.length = 0;
+                  //alert(names);
+                  var div_children = document.getElementById("namelist_page8");
+                  while(div_children.firstChild) div_children.removeChild(div_children.firstChild);
+                  x = 0;
+                }
+              })
+              .catch((error) => {
+                notifyAlert('エラー','error');
+              });
+        }
+    }
+
+    //名前入力値の確認
+    function nameText(){
+        var name = document.getElementById('name');
+        //名前が入力されているor同名が入っているか判断する
+        if(name.value==""){
+
+        //同名の排除
+        }else if(names.indexOf(name.value)>=0){
+             notifyAlert('エラー','同名は使えません');
+        }else if(names.length >= 20){
+          notifyAlert('エラー','人数は20人が上限です');
+        }else{
+            //特殊記号の置換
+            escape_name = (name.value);
+           //alert(escape_name);
+            escape_name = escape_html(escape_name);
+            //alert(escape_name);
+            nameset();
+        }
+        name.focus();
+    }
+
+
+function escape_html(targetValue) {
+  if (targetValue === null || targetValue === undefined) {
+     return "";
+  }
+  return String(targetValue)
+     .replace(/&/g, '&amp;')
+     .replace(/"/g, '"')
+     .replace(/'/g, "'")
+     .replace(/`/g, "`")
+     .replace(/</g, "<")
+     .replace(/>/g, ">");
+}
+
+
+    //プレイヤー確定設定
+    async function redraw_page4(){
+      //五人未満じゃないかの確認
+        if(names.length < 5){
+            notifyAlert('エラー','最低5人名前を入力してください');
+        }else{
+            murabito_num = names.length - 1;
+            await document.querySelector('#navigator').pushPage('page4.html',{ animation: "fade" });
+            change();//イラストの変更
+            document.getElementById('murabitonum').innerHTML = murabito_num;
+            bousyoku_num = 1;
+            uranai_num = 0;
+            reibai_num = 0;
+            kisi_num = 0;
+            kyoujin_num = 0;
+        }
+    }
+
+
+
+    //役職人数設定
+    //ノーティフィケーションの人数変更（不要の可能性大）
+    function addmurabito(){
+        murabito_num=murabito_num-1;
+        var murabitonum = document.getElementById('murabitonum');
+        murabitonum.innerHTML = murabito_num;
+        if(murabito_num <= 0){
+           //alert('ノーティフィケーションは最低1人です');
+            murabito_num=murabito_num + 1;
+            var murabitonum = document.getElementById('murabitonum');
+            murabitonum.innerHTML = murabito_num;
+        }
+    }
+
+    function add_plus_murabito(){
+      if(murabito_num>=names.length-1){
+
+      }else{
+        murabito_num=murabito_num+1;
+        var murabitonum = document.getElementById('murabitonum');
+        murabitonum.innerHTML = murabito_num;
+      }
+    }
+
+    //汚職者の人数変更
+    function add_bousyoku_plus_num(){
+        if(1< murabito_num & bousyoku_num <4){
+            bousyoku_num=bousyoku_num+1;
+            murabito_num = murabito_num -1;
+            var bousyoku = document.getElementById('bousyokunum');
+            bousyokunum.innerHTML = bousyoku_num;
+            document.getElementById("murabitonum").innerHTML=murabito_num;
+        }
+    }
+
+    function add_bousyoku_num(){
+      if(bousyoku_num >1){
+      bousyoku_num = bousyoku_num - 1;
+      murabito_num = murabito_num + 1;
+        var bousyoku = document.getElementById('bousyokunum');
+        bousyoku.innerHTML = bousyoku_num;
+        document.getElementById("murabitonum").innerHTML=murabito_num;
+      }
+    }
+
+    //フォレンジックエンジニアの人数変更
+    function add_uranai_plus_num(){
+      if(1 < murabito_num & uranai_num < 2){
+      uranai_num = uranai_num+1;
+      murabito_num = murabito_num - 1;
+      document.getElementById("uranainum").innerHTML= uranai_num;
+      document.getElementById("murabitonum").innerHTML = murabito_num;
+      }
+    }
+
+    function add_uranai_num(){
+      if(0< uranai_num){
+        uranai_num = uranai_num -1;
+        murabito_num = murabito_num+1;
+        document.getElementById("uranainum").innerHTML = uranai_num;
+        document.getElementById("murabitonum").innerHTML = murabito_num;
+      }
+    }
+
+    //コマンダーの人数変更
+    function add_kisi_plus_num(){
+      if(1 < murabito_num & kisi_num <2){
+      kisi_num= kisi_num+1;
+      murabito_num = murabito_num - 1;
+      document.getElementById("kisi").innerHTML= kisi_num;
+      document.getElementById("murabitonum").innerHTML = murabito_num;
+      }
+    }
+
+    function add_kisi_num(){
+      if(0< kisi_num){
+        kisi_num = kisi_num -1;
+        murabito_num = murabito_num+1;
+        document.getElementById("kisi").innerHTML = kisi_num;
+        document.getElementById("murabitonum").innerHTML = murabito_num;
+      }
+    }
+
+    //リサーチャーの人数変更
+    function add_reibai_plus_num(){
+      if(1 < murabito_num & reibai_num < 2){
+      reibai_num= reibai_num+1;
+      murabito_num = murabito_num - 1;
+      document.getElementById("reibai").innerHTML= reibai_num;
+      document.getElementById("murabitonum").innerHTML = murabito_num;
+      }
+    }
+
+    function add_reibai_num(){
+      if(0< reibai_num){
+        reibai_num = reibai_num -1;
+        murabito_num = murabito_num+1;
+        document.getElementById("reibai").innerHTML = reibai_num;
+        document.getElementById("murabitonum").innerHTML = murabito_num;
+      }
+    }
+
+    //ブラックハットハッカーの人数変更
+    function add_kyoujin_plus_num(){
+      if(1 < murabito_num & kyoujin_num < 2){
+      kyoujin_num = kyoujin_num+1;
+      murabito_num = murabito_num - 1;
+      document.getElementById("kyoujin").innerHTML= kyoujin_num;
+      document.getElementById("murabitonum").innerHTML = murabito_num;
+      }
+    }
+
+    function add_kyoujin_num(){
+      if(0< kyoujin_num){
+        kyoujin_num = kyoujin_num -1;
+        murabito_num = murabito_num+1;
+        document.getElementById("kyoujin").innerHTML = kyoujin_num;
+        document.getElementById("murabitonum").innerHTML = murabito_num;
+      }
+    }
+
+
+    //配列内の順番をランダムにする
+    function job_random(){
+        for (var i = job.length - 1; i >= 0; i--){
+          // 0~iのランダムな数値を取得
+          var rand = Math.floor( Math.random() * ( i + 1 ) );
+          // 配列の数値を入れ替える
+          [job[i], job[rand]] = [job[rand], job[i]]
+        }
+
+        for(var i = 0;i<names.length;i++){//職種名格納ループ
+                    if(job[i]==0){
+                        jobnames[i] = "汚職者";
+                    }else if(job[i]==1){
+                        jobnames[i] = "ノーティフィケーション";
+                    }else if(job[i]==2){
+                        jobnames[i] = "フォレンジックエンジニア";
+                    }else if(job[i]==3){
+                        jobnames[i] = "リサーチャー";
+                    }else if(job[i]==4){
+                        jobnames[i] = "コマンダー";
+                    }else if(job[i]==5){
+                        jobnames[i] = "ブラックハットハッカー";
+                    }
+        }
+    }
+
+    //配列に人数分0を入れ初期化する
+    function ded_in(){
+        for(var i=0; i<names.length; i++){
+            ded.push(0);
+            m_touhyou.push(0);
+            kisi.push(0);
+            j_touhyou.push(0)
+            satugai_count.push(0);
+            Citizenbox.push(0);
+            Wolfbox.push(0);
+            Madmanbox.push(0);
+        }
+        for(var i = 0 ; i < names.length; i++){
+            if( job[i] == 0){
+                Wolfbox[i] = 1 ;
+                Cntwolf = Cntwolf + 1;
+            }
+            if(job[i] != 0 & job[i] != 5){
+                Citizenbox[i] = 1;
+                Cntcitizen = Cntcitizen + 1;
+            }
+            if(job[i] == 5){
+              Madmanbox[i] = 1;
+              Cntmadman = Cntmadman + 1;
+            }
+        }
+    }
+
+    //役職人数確定
+    async function position_set(){
+      var wolfside = bousyoku_num + kyoujin_num;
+      var CSIRTside = murabito_num + uranai_num + reibai_num + kisi_num;
+      if(wolfside >= CSIRTside){
+         notifyAlert('エラー','汚職者に対してCSIRT側の数が足りません。再設定してください。');
+      }else{
+        await document.querySelector('#navigator').pushPage('page5.html',{ animation: "fade" });
+        document.getElementById( "haibun" ).innerHTML="<p>役職</br>汚職者　" + jobnum[0] + "</br>ノーティフィケーション　" + jobnum[1] + "</br>フォレンジックエンジニア　" + jobnum[2] + "</br>リサーチャー　"+ jobnum[3] +"</br>コマンダー　"+ jobnum[4]  +"</br>ブラックハットハッカー　" + jobnum[5] + "</p>";
+      }
+    }
+
+
+    //役職の人数をjob配列に格納する
+    async function job_set(){
+      var wolfside = bousyoku_num + kyoujin_num;
+      var CSIRTside = murabito_num + uranai_num + reibai_num + kisi_num;
+      //CSIRTと汚職者の人数比が合わないか確認
+      if(wolfside >= CSIRTside){
+         notifyAlert('エラー','汚職者に対してCSIRT側の数が足りません。再設定してください。');
+      }else{
+        job = [];
+        var i = 0;
+        while(i < murabito_num){
+          job.push(1);
+          i = i+1;
+        }
+        i=0;
+        while(i < bousyoku_num){
+          job.push(0);
+          i = i+1;
+        }
+        i=0;
+        while(i < uranai_num){
+          job.push(2);
+          i =i+1;
+        }
+        i = 0;
+        while(i < reibai_num){
+          job.push(3);
+          i = i+1;
+        }
+        i = 0;
+        while(i < kisi_num){
+          job.push(4);
+          i = i+1;
+        }
+        i =0;
+        while(i < kyoujin_num){
+          job.push(5);
+          i = i+1;
+        }
+        i = 0;
+      await document.querySelector('#navigator').pushPage('page5.html',{ animation: "fade" });
+
+      document.getElementById("haibun_murabito").innerHTML =murabito_num;
+      document.getElementById("haibun_osyokusya").innerHTML =bousyoku_num;
+      document.getElementById("haibun_uranai").innerHTML =uranai_num;
+      document.getElementById("haibun_reibai").innerHTML =reibai_num;
+      document.getElementById("haibun_kisi").innerHTML =kisi_num;
+      document.getElementById("haibun_kyoujin").innerHTML =kyoujin_num;
+
+    }
+  }
+  var night_ordinal = "st"
+  function ordinal(){
+    if(night ==1){
+      night_ordinal = "st"
+    }else if(night == 2){
+      night_ordinal = "nd"
+    }else if(night == 3){
+      night_ordinal = "rd"
+    }else if(night >3){
+      night_ordinal = "th"
+    }
+  }
+
+    //「夜になりました」のページを表示させる
+    async function page17_load(){
+      save_on = 1;
+      save();
+      ordinal();
+        await document.querySelector('#navigator').resetToPage('page17.html',{ animation: "fade" });
+        document.getElementById('page17_night').innerHTML = night+("日目の夜になりました");
+    }
+
+
+    //朝直前の処理
+    async function morning(){
+        var cal =ded.indexOf(0);
+        rdname = names[cal];
+
+        await document.querySelector('#navigator').pushPage('page9.html',{ animation: "fade" });
+        document.getElementById('morningset').innerHTML = ("The ")+night+night_ordinal+(" Night");
+        document.getElementById('page9_name').innerHTML = rdname;
+    }
+
+    //話し合い前の説明画面
+    async function discussion(){
+      promise=notifyConfirm("確認","あなたは "+ rdname + " さんですか？");
+        promise
+        .then(async(result) => {
+          if(result == 0 || result == -1){
+                  // cancel時の処理
+          } else {
+              await document.querySelector('#navigator').resetToPage('page12.html',{ animation: "fade" });
+                if(page12_A==0){
+                  document.getElementById('gisei').innerHTML = ("内部不正が発見されました");
+                  page12_A = 0;
+                }else if(page12_A==1){
+                  document.getElementById('gisei').innerHTML = ('昨晩解雇された人はいませんでした。');
+                  page12_A = 0;
+                }else{
+                  document.getElementById('gisei').innerHTML = gisei + ('さんに解雇予告通知が出されました。');
+                  document.getElementById('page12_text').innerHTML = ('以降 ' + gisei + ' さんは、ゲーム終了まで話してはいけません。');
+                  page12_A = 0;
+                }
+          }
+              })
+              .catch((error) => {
+                notifyAlert('エラー','error');
+              });
+        night = night + 1;
+    }
+
+    //夜のプレイヤー確認
+    async function Confirmation(){
+      ordinal();
+        dedSkip();
+        if(names[page6_name]==undefined){
+            if(night>1){
+                giseisya();
+            }
+            morning();
+            page6_name=0;
+        }else{
+        await document.querySelector('#navigator').resetToPage('page6.html',{ animation: "fade" });
+        document.getElementById('nightset').innerHTML = ("The ")+night+night_ordinal+(" Night");
+        document.getElementById('page6_name').innerHTML = names[page6_name];
+        //マーク
+        }
+    }
+
+    //死んだ人の順番を飛ばす
+    function dedSkip(){
+        if(ded[page6_name]==1){
+            page6_name = page6_name + 1;
+            Confirmation();
+        }
+    }
+
+    function p_numeset(){
+        for(var i = 0 ; i < names.length ; i++){
+            if(names[page6_name] === names[i]){
+                var num = i ;
+
+                //alert(job[i]);
+                p_num=job[i];
+                //alert(p_num);
+            }
+        }
+        //alert(num);
+    }
+
+    //夜のプレイヤー確認時の処理
+async function page6_ENTER(){
+  promise=notifyConfirm("確認","あなたは "+names[page6_name]+" さんですか？");
+  promise
+  .then(async(result) => {
+    if(result == 0 || result == -1){
+    // cancel時の処理
+    } else {
+      p_numeset();
+      await document.querySelector('#navigator').resetToPage('page7_' + p_num + '.html',{ animation: "fade" });
+      changeimg();
+      if(p_num==0){
+        for(var i=0; i<names.length;i++){
+          if(job[i]==0 || names[i]==names[page6_name]){
+            document.getElementById( "jinrou_nem" ).insertAdjacentHTML('afterbegin', '<p id="red">' + names[i] + '</p>');
+          }
+        }
+      }
+
+      if(Fortune_switch == 1 && night == 1){
+        if(p_num==2){
+          //document.getElementById( "page7_uranai" ).insertAdjacentHTML('afterbegin', '<p>調査する人を選択してください</p>');
+          document.getElementById('push-button').style.visibility ="hidden";
+          name_button_2();
+        }
+      }
+
+      if(night>1){
+        document.getElementById('push-button').style.visibility ="hidden";
+        if(p_num==0){//修正分
+          name_button_0();
+        }else if(p_num==1){
+          name_button_1();
+        }else if(p_num==2){
+          name_button_2();
+        }else if(p_num==3){
+          name_button_3();
+        }else if(p_num==4){
+          name_button_4();
+        }else if(p_num==5){
+          name_button_5();
+        }
+      }
+    }
+  })
+    .catch((error) => {
+    notifyAlert('エラー','error');
+    });
+  }
+
+
+
+    //※以下夜の役職ごとの処理
+    //汚職者の処理
+    function name_button_0(){
+        var $namebutton = document.createElement( "BUTTON" );
+        $namebutton.textContent = names[v];
+        var ninzu=names.length;
+        for (var i=0;i<ninzu;i++){
+            if(job[i]==0 || ded[i]==1){
+                v++;
+            }else{
+                document.getElementById( "namebutton0" ).appendChild(jinrou_bunnto());
+                document.getElementById( "namebutton0" ).appendChild(document.createElement( "br" ));
+                document.getElementById( "namebutton0" ).appendChild(document.createElement( "br" ));
+                v++;
+            }
+        }
+        v=0;
+    }
+
+    function jinrou_bunnto(){
+        var $nameButton = document.createElement( "BUTTON" );
+        var name=names[v];
+        $nameButton.textContent = (name);
+        $nameButton.id=('push-button');
+        (function(j){
+            //ここからがnames[v]の番号が押された時の処理
+            $nameButton.onclick = function(){
+            promise=notifyConfirm("確認",names[j]+" さんを解雇させますか？");
+            promise
+              .then((result) => {
+                if(result == 0 || result == -1){
+                  // cancel時の処理
+                } else {
+                  j_touhyou[j]=j_touhyou[j] + 1;
+                  //alert(j_touhyou);//デバック用のアラート
+                  next_player();//ボタンを押されて投票された後に次の人へ移る
+                }
+              })
+              .catch((error) => {
+                notifyAlert('エラー','error');
+              });
+            };
+        })(v);
+        return $nameButton;
+    }
+
+    //ノーティフィケーション怪しい人投票
+    function name_button_1(){
+        var $namebutton = document.createElement( "BUTTON" );
+        $namebutton.textContent = names[v];
+        var ninzu=names.length;
+        for (var i=0;i<ninzu;i++){
+            if(names[i]==names[page6_name] || ded[i]==1){
+                v++;
+            }else{
+                document.getElementById( "namebutton1" ).appendChild( touhyou_m());
+                document.getElementById( "namebutton1" ).appendChild(document.createElement( "br" ));
+                document.getElementById( "namebutton1" ).appendChild(document.createElement( "br" ));
+                v++;
+            }
+        }
+        v=0;
+    }
+
+    function touhyou_m(){
+        var $nameButton = document.createElement( "BUTTON" );
+        var name=names[v];
+        $nameButton.textContent = (name);
+        $nameButton.id=('push-button');
+        (function(j){
+            //ここからがnames[v]の番号が押された時の処理
+            $nameButton.onclick = function(){
+                promise=notifyConfirm("確認",names[j]+" さんに投票しますか？");
+                promise
+                .then(async(result) => {
+                if(result == 0 || result == -1){
+                // cancel時の処理
+                } else {
+                      m_touhyou[j]=m_touhyou[j] + 1;
+                      //alert(m_touhyou);//デバック用のアラート
+                      next_player(); //ボタンを押されて投票された後に次の人へ移る
+        	      }
+                })
+                .catch((error) => {
+                notifyAlert('エラー','error');
+	              });
+            };
+            })(v);
+        return $nameButton;
+    }
+
+
+    //フォレンジックエンジニア用のプレイヤーボタン＆処理
+    var v=0;
+    //プレイヤー分のボタン表示
+    function name_button_2() {
+        var $nameButton = document.createElement( "BUTTON" );
+        $nameButton.textContent = names[v];
+        var ninzu = names.length;
+        for (var i=0;i<ninzu;i++){
+            if(names[i]==names[page6_name] || ded[i]==1){
+                v++;
+            }else{
+                document.getElementById( "namebutton2" ).appendChild( createChildElement());
+                document.getElementById( "namebutton2" ).appendChild(document.createElement( "br" ));
+                document.getElementById( "namebutton2" ).appendChild(document.createElement( "br" ));
+                v++;
+            }
+        }
+        v=0;
+    }
+
+    //ボタンの押された時の占い処理
+    function createChildElement() {
+        var $nameButton = document.createElement( "BUTTON" );
+        var name=names[v];
+        $nameButton.textContent = (name);
+        $nameButton.id=('push-button');
+        if(p_num==2){
+        (function(j){
+            $nameButton.onclick = function(){
+              promise=notifyConfirm("確認",names[j]+" さんを調査しますか？");
+              promise
+              .then(async(result) => {
+                if(result == 0 || result == -1){
+                      // cancel時の処理
+                      } else {
+                    if(job[j]<1){
+                    document.querySelector('#navigator').pushPage('page16_2.html',{ animation: "fade" });//汚職者
+                    }else{
+                    document.querySelector('#navigator').pushPage('page16_1.html',{ animation: "fade" });//CSIRT
+                    }
+                      }
+                })
+                      .catch((error) => {
+                      notifyAlert('エラー','error');
+                });
+            };
+        })(v);
+        }
+        return $nameButton;
+    }
+
+
+    var qwiet = 0;
+    //リサーチャー怪しい人投票&死亡者陣営
+    function name_button_3(){
+        var $namebutton = document.createElement( "BUTTON" );
+        $namebutton.textContent = names[v];
+        var ninzu=names.length;
+        var giseijob=0;
+        document.getElementById( "page7_3_gisei" ).insertAdjacentHTML('afterbegin', '<p>今まで解雇された人</p>');
+        for (var i=0;i<ninzu;i++){
+            if(ded[i]==1){
+                if(job[i]<1){
+                    document.getElementById( "page7_3_giseisya" ).insertAdjacentHTML('afterbegin', '<p>' + names[i] + 'さん 汚職者側</p>');
+                }else{
+                    document.getElementById( "page7_3_giseisya" ).insertAdjacentHTML('afterbegin', '<p>' + names[i] + 'さん CSIRT側</p>');
+                }
+            }
+        }
+        for (var i=0;i<ninzu;i++){
+            if(names[i]==names[page6_name] || ded[i]==1){
+                v++;
+            }else{
+                document.getElementById( "namebutton3" ).appendChild( touhyou_r());
+                document.getElementById( "namebutton3" ).appendChild(document.createElement( "br" ));
+                document.getElementById( "namebutton3" ).appendChild(document.createElement( "br" ));
+                v++;
+            }
+        }
+        v=0;
+    }
+
+    function touhyou_r(){
+        var $nameButton = document.createElement( "BUTTON" );
+        var name=names[v];
+        $nameButton.textContent = (name);
+        $nameButton.id=('push-button');
+        (function(j){
+            //ここからがnames[v]の番号が押された時の処理
+            $nameButton.onclick = function(){
+                promise=notifyConfirm("確認",names[j]+" さんに投票しますか？");
+                promise
+                .then((result) => {
+                if(result == 0 || result == -1){
+                // cancel時の処理
+                } else {
+                      m_touhyou[j]=m_touhyou[j] + 1;
+                      //alert(m_touhyou);//デバック用のアラート
+                      next_player(); //ボタンを押されて投票された後に次の人へ移る
+        	      }
+                })
+                .catch((error) => {
+                notifyAlert('エラー','error');
+	              });
+            };
+        })(v);
+        return $nameButton;
+    }
+
+    //コマンダーの処理
+    function name_button_4(){
+        var $namebutton = document.createElement( "BUTTON" );
+        $namebutton.textContent = names[v];
+        var ninzu=names.length;
+        for (var i=0;i<ninzu;i++){
+            if(names[i]==names[page6_name] || ded[i]==1){
+                v++;
+            }else{
+                document.getElementById( "namebutton4" ).appendChild(knight());
+                document.getElementById( "namebutton4" ).appendChild(document.createElement( "br" ));
+                document.getElementById( "namebutton4" ).appendChild(document.createElement( "br" ));
+                v++;
+            }
+        }
+        v=0;
+    }
+
+    function knight(){
+        var $nameButton = document.createElement( "BUTTON" );
+        var name=names[v];
+        $nameButton.textContent = (name);
+        $nameButton.id=('push-button');
+        (function(j){
+            //ここからがnames[v]の番号が押された時の処理
+            $nameButton.onclick = function(){
+                promise=notifyConfirm("確認",names[j]+" さんを守りますか？");
+                promise
+                .then(async(result) => {
+                  if(result == 0 || result == -1){
+                        // cancel時の処理
+                        } else {
+                   kisi[j]=1;
+                   //alert(kisi);//デバック用のアラート
+                   next_player();//ボタンを押されて投票された後に次の人へ移る
+                          }
+                        })
+                        .catch((error) => {
+                        notifyAlert('エラー','error');
+                  });
+            };
+        })(v);
+        return $nameButton;
+    }
+
+
+    //ブラックハットハッカー怪しい人投票
+    function name_button_5(){
+        var $namebutton = document.createElement( "BUTTON" );
+        $namebutton.textContent = names[v];
+        var ninzu=names.length;
+        for (var i=0;i<ninzu;i++){
+            if(names[i]==names[page6_name] || ded[i]==1){
+                v++;
+            }else{
+                document.getElementById( "namebutton5" ).appendChild( touhyou_kyo());
+                document.getElementById( "namebutton5" ).appendChild(document.createElement( "br" ));
+                document.getElementById( "namebutton5" ).appendChild(document.createElement( "br" ));
+                v++;
+            }
+        }
+        v=0;
+    }
+
+    function touhyou_kyo(){
+        var $nameButton = document.createElement( "BUTTON" );
+        var name=names[v];
+        $nameButton.textContent = (name);
+        $nameButton.id=('push-button');
+        (function(j){
+            //ここからがnames[v]の番号が押された時の処理
+            $nameButton.onclick = function(){
+                promise=notifyConfirm("確認",names[j]+" さんに投票しますか？");
+                promise
+                .then((result) => {
+                if(result == 0 || result == -1){
+                // cancel時の処理
+                } else {
+                      m_touhyou[j]=m_touhyou[j] + 1;
+                      //alert(m_touhyou);//デバック用のアラート
+                      next_player(); //ボタンを押されて投票された後に次の人へ移る
+        	      }
+                })
+                .catch((error) => {
+                notifyAlert('エラー','error');
+	              });
+            };
+        })(v);
+        return $nameButton;
+    }
+
+
+    //夜の処理を次の人へ渡す
+    async function next_player(){
+        page6_name=page6_name + 1;
+        Confirmation();
+    }
+
+    //夜の犠牲者を決定させる
+    function giseisya(){
+        var gisei_l = (Math.max.apply(null, j_touhyou));//一番多い数を取得
+        //maxの値が複数ないか検索
+        for(var i = 0 ; i < names.length ; i++){
+            if(j_touhyou[i]==gisei_l){
+                j_random.push(names[i]);//一度maxの値に該当する名前をj_random配列内に収納
+            }
+        }
+        var gisei4 = j_random[Math.floor(Math.random() * j_random.length)];//j_random内からランダムに取得
+        //alert(gisei4);//誰が取得されたかを確認
+        var gisei_num = names.indexOf(gisei4);//上の人が何番目の配列番号にあるかを取得
+        //alert(gisei_num);
+        //以降コマンダーの判定
+        if(kisi[gisei_num]!=1){
+            //守れてなかったら
+            gisei = gisei4;
+            ded[gisei_num] = 1;
+            if (Citizenbox[gisei_num] == 1){
+                Cntcitizen = Cntcitizen - 1;
+            }
+            if(Wolfbox[gisei_num] == 1){
+                Cntwolf = Cntwolf - 1;
+            }
+            if(Madmanbox[gisei_num] == 1){
+                Cntmadman = Cntmadman -1 ;
+            }
+            page12_A = 2;
+        }else{
+            //守れたら
+            page12_A = 1;
+        }
+                if(ded[AA] == 1){
+                  for(var i = 0; ded[AA] == 1; i++){
+                      AA++;
+                  }
+                }
+        night_reset();
+        j_random = [];
+    }
+
+    function night_reset(){
+        for(var i=0; i<names.length; i++){
+            //m_touhyou[i] = 0;
+            kisi[i] = 0;
+            j_touhyou[i] = 0;
+        }
+    }
+
+     async function test19(){
+        await  document.querySelector('#navigator').pushPage('page13.html',{ animation: "fade" });
+        satugai_touhyou();
+    }
+
+    //殺害投票
+    async function satugai_touhyou(){
+        var $satugaiButton = document.createElement( "BUTTON" );
+        $satugaiButton.textContent = names[v];
+        var ninzu=names.length;
+        for (var i=0;i<ninzu;i++){
+            if(names[i]==names[AA] || ded[touhyou_ded]==1){
+                v++;
+                touhyou_ded++;
+            }else{
+                document.getElementById( "touhyou" ).appendChild( touhyou_satugai00());
+                document.getElementById( "touhyou" ).appendChild(document.createElement( "br" ));
+                document.getElementById( "touhyou" ).appendChild(document.createElement( "br" ));
+                v++;
+                touhyou_ded++;
+            }
+        }
+        v=0;
+    }
+    //殺害投票2
+function touhyou_satugai00(){
+   document.getElementById("touhyou00").innerHTML =  names[AA] + 'さんは誰に投票しますか？'
+   var $satugaiButton = document.createElement( "BUTTON" );
+   $satugaiButton.id = ('push-button');
+   var name=names[v];
+   $satugaiButton.textContent = (name);
+   $satugaiButton.id=('push-button');
+   (function(j){
+       //ここからがnames[v]の番号が押された時の処理
+       $satugaiButton.onclick = function(){
+         promise=notifyConfirm("確認",names[j]+"さんに投票しますか？");
+         promise
+         .then(async(result) => {
+         	if(result == 0 || result == -1){
+                 // cancel時の処理
+                 } else {
+                   satugai_count[j]=satugai_count[j] + 1;
+                   //alert(satugai_count);//デバック用のアラート
+                    AA++;
+                    if(ded[AA] == 1){
+                   for(var i = 0; ded[AA] == 1; i++){
+                   AA++;
+                   }
+                }
+                    touhyou_ded = 0;
+                    document.getElementById( "touhyou" ).textContent = null;
+                    if(AA ==names.length){
+                      notifyAlert('確認','投票されました。次の人に回してください');
+                      touhyou_kakutei();
+                    }else{
+                      notifyAlert('確認','投票されました。次の人に回してください');
+                    satugai_touhyou();
+                     }
+                 	}
+                 })
+                 .catch((error) => {
+                 notifyAlert('エラー','error');
+         	});
+       };
+   })(v);
+   return $satugaiButton;
+}
+
+    async function touhyou_kakutei( ){
+        await document.querySelector('#navigator').pushPage('page14.html',{ animation: "fade" });
+        //最大値を取得しもし最大値が2つあったらランダムで出力する
+                var maxData = satugai_count[0];
+                for (var i = 0; i < satugai_count.length; i++) {
+                 maxData = Math.max(maxData,satugai_count[i]);
+                }
+                 for (var i = 0; i < satugai_count.length; i++) {
+                     if(satugai_count[i] === maxData){
+                         keltuka[S] = i;
+                         S++;
+                }
+                }
+                Fortune_switch = 2;
+                var i = 0;
+                var i = keltuka[ Math.floor( Math.random() * keltuka.length ) ]
+                document.getElementById( "satugaikeltuka" ).innerHTML =  '投票の結果'+names[i] +'さんが解雇されました';
+                ded[i] = 1;
+        //シーサート陣営または汚職者陣営の配列を参照し配列に1が立っていたらカウントを1減らす
+                if (Citizenbox[i] == 1){
+                    Cntcitizen = Cntcitizen - 1;
+                }
+                if(Wolfbox[i] == 1){
+                    Cntwolf = Cntwolf - 1;
+                }
+                if(Madmanbox[i] == 1){
+                Cntmadman = Cntmadman -1 ;
+            }
+    }
+
+    //勝利判定
+    //汚職者とシーサートが同数なら汚職者勝利　汚職者が0になったらシーサートの勝利　それ以外は継続する(継続時必要であれば0処理をする)
+    //この条件式を各殺害処理の後に入れればOK
+    var hannteibasyo = 0;
+     async function page14_load(){
+            if(Cntcitizen == Cntwolf + Cntmadman){
+                await document.querySelector('#navigator').pushPage('page15.html',{ animation: "fade" });
+                gamehantei = 1;
+                document.getElementById( "result" ).innerHTML =  'サイバー犯罪者陣営の勝利です';
+                 var str = '';
+                for (var i = 0;i<names.length;i++) {
+                    	str = str + '<p>' +names[i] + '：' + jobnames[i] + '</p>';
+            	   }
+            	document.getElementById('a').innerHTML = str;
+                }else if(Cntwolf == 0){
+                 await document.querySelector('#navigator').pushPage('page15.html',{ animation: "fade" });
+                gamehantei = 1;
+                document.getElementById( "result" ).innerHTML =  'CSIRT陣営の勝利です';
+                var str = '';
+
+                for (var i = 0;i<names.length;i++) {
+	                	str = str + '<p>' +names[i] + '：' + jobnames[i] + '</p>';
+            	}
+            	document.getElementById('a').innerHTML = str;
+                }else if (gamehantei == 1){
+                    for(var i = 0;i<names.length;i++){
+                        satugai_count[i] = 0;
+                        m_touhyou[i] = 0;
+                    }
+                    AA = 0;
+                    S = 0;
+                    keltuka=[];
+                    touhyou_ded = 0;
+                    gamehantei = 0;
+                     murabito_touhyou_keltuka = [];
+                    page17_load();//夜が来た
+                    }else if(gamehantei == 0){
+                    touhyou_kakutei00();
+                }
+
+            }
+
+    async function touhyou_kakutei00(){
+        if(W != 0){
+                gamehantei = 1;
+                await document.querySelector('#navigator').pushPage('page13_2.html',{ animation: "fade" });
+                var maxData = m_touhyou[0];
+                for (var i = 0; i < m_touhyou.length; i++) {
+                 maxData = Math.max(maxData,m_touhyou[i]);
+                }
+                //alert(maxData);
+                 for (var i = 0; i < m_touhyou.length; i++) {
+                     if(m_touhyou[i] === maxData){
+                         murabito_touhyou_keltuka[S] = i;
+                         S++;
+                }
+                }
+                //alert(murabito_touhyou_keltuka);
+                var i = 0;
+                var i = murabito_touhyou_keltuka[ Math.floor( Math.random()*murabito_touhyou_keltuka.length ) ]
+                //alert(i);
+                document.getElementById( "murabito_keltuka" ).innerHTML =  names[i] +'さんです';
+                S = 0;
+    }else{
+    W = 1;
+    gamehantei = 1;
+    await document.querySelector('#navigator').replacePage('page26.html',{ animation: "fade" });
+    }
+    }
+
+    function keltuka_murabit(){
+     document.querySelector('#navigator').replacePage('page26.html',{ animation: "fade" });
+    }
+
+    //全処理の初期化
+    function page15_last(){
+        p_num=0;
+        murabito_num=0;
+        bousyoku_num=0;
+        uranai_num = 0;
+        reibai_num = 0;
+        kisi_num = 0;
+        kyoujin_num = 0;
+        night=1;
+        page6_name=0;
+        ded=[];
+        job=[];
+        m_touhyou=[];
+        kisi=[];
+        j_touhyou=[];
+        satugai_count=[];
+        Citizenbox=[];
+        Wolfbox=[];
+        Madmanbox = [];
+        Cntcitizen = 0;
+        Cntwolf = 0;
+        Cntmadman = 0;
+        gamehantei=0;
+        AA=0;
+        jobnames=[];
+        W = 0;
+        keltuka = [];
+        S = 0;
+        Fortune_switch = 1;
+
+        localStorage.clear();
+        document.querySelector('#navigator').resetToPage('page1.html',{ animation: "fade" });
+    }
+
+
+
+//初夜占い　ON　OFF
+  function test_1(){
+    if(Fortune_switch==0){
+      Fortune_switch = 1;
+      //alert(Fortune_switch);
+    }else{
+      Fortune_switch = 0;
+      //alert(Fortune_switch);
+    }
+  }
+//ローカルストレージへの保存
+ async function save(){
+   await localStorage.setItem('save_j',save_on);
+
+  localStorage.setItem('names_j',JSON.stringify(names));
+  localStorage.setItem('job_j',JSON.stringify(job));
+  localStorage.setItem('ded_j',JSON.stringify(ded));
+  localStorage.setItem('m_touhyou_j',JSON.stringify(m_touhyou));
+  localStorage.setItem('kisi_j',JSON.stringify(kisi));
+  localStorage.setItem('j_touhyou_j',JSON.stringify(j_touhyou));
+  localStorage.setItem('satugai_count_j',JSON.stringify(satugai_count));
+  localStorage.setItem('Citizenbox_j',JSON.stringify(Citizenbox));
+  localStorage.setItem('Wolfbox_j',JSON.stringify(Wolfbox));
+  localStorage.setItem('Madmanbox_j',JSON.stringify(Madmanbox));
+  localStorage.setItem('jobnames_j',JSON.stringify(jobnames));
+  localStorage.setItem('keltuka_j',JSON.stringify(keltuka));
+
+
+  localStorage.setItem('p_num_j',p_num);
+  localStorage.setItem('imgchange_j',imgchange);
+  localStorage.setItem('night_j',night);
+  localStorage.setItem('page6_name_j',page6_name);
+  localStorage.setItem('Cntcitizen_j',Cntcitizen);
+  localStorage.setItem('Cntwolf_j',Cntwolf);
+  localStorage.setItem('Cntmadman_j',Cntmadman);
+  localStorage.setItem('gamehantei_j',gamehantei);
+  localStorage.setItem('W_j',W);
+}
+
+//ローカルストレジからの値取得
+function load(){
+  var i = 0;
+  var namesJ = localStorage.getItem('names_j')
+  names = JSON.parse(namesJ);
+
+  var jobJ = localStorage.getItem('job_j');
+  jobJ = JSON.parse(jobJ);
+      while(i < jobJ.length){
+        var A = parseInt(jobJ[i],10);
+        job.push(A);
+        i = i+1;
+      }
+      i=0;
+
+
+  var dedJ = localStorage.getItem('ded_j');
+  dedJ = JSON.parse(dedJ);
+      while(i < dedJ.length){
+        var A = parseInt(dedJ[i],10);
+        ded.push(A);
+        i = i+1;
+      }
+
+    i=0;
+
+
+  var m_touhyouJ = localStorage.getItem('m_touhyou_j');
+  m_touhyouJ = JSON.parse(m_touhyouJ);
+      while(i < m_touhyouJ.length){
+        var A = parseInt(m_touhyouJ[i],10);
+        m_touhyou.push(A);
+        i = i+1;
+      }
+
+    i=0;
+
+  var kisiJ = localStorage.getItem('kisi_j');
+  kisiJ = JSON.parse(kisiJ);
+      while(i < kisiJ.length){
+        var A = parseInt(kisiJ[i],10);
+        kisi.push(A);
+        i = i+1;
+      }
+
+    i=0;
+
+  var j_touhyouJ = localStorage.getItem('j_touhyou_j');
+  j_touhyouJ = JSON.parse(j_touhyouJ);
+      while(i < j_touhyouJ.length){
+        var A = parseInt(j_touhyouJ[i],10);
+        j_touhyou.push(A);
+        i = i+1;
+      }
+
+  i=0;
+
+
+  var satugai_countJ = localStorage.getItem('satugai_count_j');
+  satugai_countJ = JSON.parse(satugai_countJ);
+        while(i < satugai_countJ.length){
+        var A = parseInt(satugai_countJ[i],10);
+        satugai_count.push(A);
+        i = i+1;
+      }
+
+  i=0;
+
+  var CitizenboxJ = localStorage.getItem('Citizenbox_j');
+  CitizenboxJ = JSON.parse(CitizenboxJ);
+        while(i < CitizenboxJ.length){
+        var A = parseInt(CitizenboxJ[i],10);
+        Citizenbox.push(A);
+        i = i+1;
+      }
+  i=0;
+
+
+  var WolfboxJ = localStorage.getItem('Wolfbox_j');
+  WolfboxJ = JSON.parse(WolfboxJ);
+        while(i < WolfboxJ.length){
+        var A = parseInt(WolfboxJ[i],10);
+        Wolfbox.push(A);
+        i = i+1;
+      }
+  i=0;
+
+
+  var MadmanboxJ =localStorage.getItem('Madmanbox_j');
+  MadmanboxJ = JSON.parse(MadmanboxJ);
+        while(i < MadmanboxJ.length){
+        var A = parseInt(MadmanboxJ[i],10);
+        Madmanbox.push(A);
+        i = i+1;
+      }
+  i=0;
+
+  var jobnamesJ =localStorage.getItem('jobnames_j');
+  jobnames = JSON.parse(jobnamesJ);
+
+
+  var keltukaJ =localStorage.getItem('keltuka_j');
+  keltukaJ = JSON.parse(keltukaJ);
+        while(i < keltukaJ.length){
+        var A = parseInt(keltukaJ[i],10);
+        keltuka.push(A);
+        i = i+1;
+      }
+
+  i=0;
+
+
+  p_num=localStorage.getItem('p_num_j');
+
+  night=localStorage.getItem('night_j');
+  night = parseInt(night,10);
+  page6_name=localStorage.getItem('page6_name_j');
+  page6_name = parseInt(page6_name,10);
+  Cntcitizen=localStorage.getItem('Cntcitizen_j');
+  Cntcitizen = parseInt(Cntcitizen,10);
+  Cntwolf=localStorage.getItem('Cntwolf_j');
+  Cntwolf = parseInt(Cntwolf,10);
+  Cntmadman=localStorage.getItem('Cntmadman_j');
+  Cntmadman = parseInt(Cntmadman,10);
+  gamehantei=localStorage.getItem('gamehantei_j');
+  gamehantei = parseInt(gamehantei,10);
+  W=localStorage.getItem('W_j');
+  W = parseInt(W,10);
+  imgchange = localStorage.getItem('imgchange_j');
+  imgchange = parseInt(imgchange,10);
+
+}
+
+
+  async function Continue(){
+    var saveJ = localStorage.getItem("save_j");
+    if(saveJ == 1){
+      promise=notifyConfirm("確認","続きから始めますか？");
+      promise
+      .then(async(result) => {
+      if(result == 0 || result == -1){
+      // cancel時の処理
+      } else {
+        load();
+        page17_load();
+      }
+      })
+      .catch((error) => {
+      notifyAlert('エラー','error');
+      });
+    }
+  }
+
+  function page25_next(){
+    page5_GameStart();
+  }
+  function page5_GameStart(){
+    page17_load();
+    job_random();
+    ded_in();
+  }
+
+
+//各種オプションへの移動
+async function op_1(){
+  imgchange = localStorage.getItem('imgchange_j');
+  imgchange = parseInt(imgchange,10);
+  await document.querySelector('#navigator').pushPage('page20.html',{ animation: "fade" });
+  if(imgchange == 0){
+    document.getElementById('image_set1').checked = false;
+    document.getElementById('image_set2').checked = true;
+    document.getElementById('img_title').innerHTML = ("人狼オリジナルイラスト");
+
+  }else{
+    document.getElementById('image_set1').checked = true;
+    document.getElementById('image_set2').checked = false;
+     document.getElementById('img_title').innerHTML = ("学生制作イラスト");
+  }
+
+}
+
+async function op_2(){
+  await document.querySelector('#navigator').pushPage('page21.html',{ animation: "fade" });
+
+}
+
+async function op_3(){
+  await document.querySelector('#navigator').pushPage('page27.html',{ animation: "fade" });
+
+}
+
+async function op_4(){
+    await document.querySelector('#navigator').pushPage('page23.html',{ animation: "fade" });
+}
+
+//ローカルストレージの削除
+function test_clear(){
+  localStorage.clear();
+  //alert("初期化")
+}
+
+function img_switch1(){
+    imgchange = 1;
+     document.getElementById('img_title').innerHTML = ("学生制作イラスト");
+     localStorage.setItem('imgchange_j',imgchange);
+}
+function img_switch2(){
+    imgchange = 0;
+    document.getElementById('img_title').innerHTML = ("人狼オリジナルイラスト");
+    localStorage.setItem('imgchange_j',imgchange);
+}
+
+function change(){
+  if(imgchange == 0){
+    document.getElementById('csirt').src = "image/simin.png"
+    document.getElementById('forensic').src = "image/kansiki.png"
+    document.getElementById('researcher').src = "image/programmer.png"
+    document.getElementById('commander').src = "image/asyura.png"
+    document.getElementById('osyoku').src = "image/osyokusya.png"
+    document.getElementById('black').src = "image/hacker.png"
+  }
+  if(imgchange == 1){
+    document.getElementById('csirt').src = "image2/csirt.png"
+    document.getElementById('forensic').src = "image2/forensic.png"
+    document.getElementById('researcher').src = "image2/researcher.png"
+    document.getElementById('commander').src = "image2/commander.png"
+    document.getElementById('osyoku').src = "image2/osyoku.png"
+    document.getElementById('black').src = "image2/black.png"
+  }
+}
+
+function changeimg(){
+  if(imgchange == 0){
+    if(p_num==0){
+    document.getElementById('osyoku').src = "image/osyokusya.png"
+    }else if(p_num==1){
+    document.getElementById('csirt').src = "image/simin.png"
+    }else if(p_num==2){
+    document.getElementById('forensic').src = "image/kansiki.png"
+    }else if(p_num==3){
+    document.getElementById('researcher').src = "image/programmer.png"
+    }else if(p_num==4){
+    document.getElementById('commander').src = "image/asyura.png"
+    }else if(p_num==5){
+    document.getElementById('black').src = "image/hacker.png"
+    }
+  }
+
+  if(imgchange == 1){
+    if(p_num==0){
+    document.getElementById('osyoku').src = "image2/osyoku.png"
+    }else if(p_num==1){
+    document.getElementById('csirt').src = "image2/csirt.png"
+    }else if(p_num==2){
+    document.getElementById('forensic').src = "image2/forensic.png"
+    }else if(p_num==3){
+    document.getElementById('researcher').src = "image2/researcher.png"
+    }else if(p_num==4){
+    document.getElementById('commander').src = "image2/commander.png"
+    }else if(p_num==5){
+    document.getElementById('black').src = "image2/black.png"
+    }
+  }
+}
+
+function evaluation(){
+  promise=notifyConfirm("アプリ評価レビュー","'セキュリティ人狼'はお楽しみいただけましたか?もし可能でしたら、アプリの評価をお願いいたします");
+                 promise
+                 .then(async(result) => {
+                 if(result == 0 || result == -1){
+                 // cancel時の処理
+                 } else {
+                 //googleプレイが開き、アプリの評価ページが開かれる（かも）
+                 // window.location.href = "market://details?id=アプリのパッケージ名"
+
+                  // 通常の遷移
+                   //window.location.href = 'https://play.google.com/store?utm_source=apac_med&utm_medium=hasem&utm_content=Jul0119&utm_campaign=Evergreen&pcampaignid=MKT-DR-apac-jp-1003227-med-hasem-py-Evergreen-Jul0119-Text_Search_BKWS-BKWS%7cONSEM_kwid_43700012434507677_creativeid_114860667305_device_c_kwd_kwd-41753592129_geoid_1009332_network_g&gclid=CjwKCAjwsIbpBRBNEiwAZF8-z1AiReb943fcVv7VYVAGDv9jSDPt8BcDsZqnCyGJc3To6YB0EL1cmBoCmWQQAvD_BwE&gclsrc=aw.ds';
+
+                  //新しいタブを開き、ページを表示
+                  window.open('https://play.google.com/store?utm_source=apac_med&utm_medium=hasem&utm_content=Jul0119&utm_campaign=Evergreen&pcampaignid=MKT-DR-apac-jp-1003227-med-hasem-py-Evergreen-Jul0119-Text_Search_BKWS-BKWS%7cONSEM_kwid_43700012434507677_creativeid_114860667305_device_c_kwd_kwd-41753592129_geoid_1009332_network_g&gclid=CjwKCAjwsIbpBRBNEiwAZF8-z1AiReb943fcVv7VYVAGDv9jSDPt8BcDsZqnCyGJc3To6YB0EL1cmBoCmWQQAvD_BwE&gclsrc=aw.ds', '_blank');
+                 }
+                 })
+                 .catch((error) => {
+                 notifyAlert('エラー','error');
+                 });
+}
+
+  </script>
+</head>
+<body>
+  <ons-navigator id="navigator" page="page1.html"></ons-navigator>
+
+
+  <!--タイトル画面-->
+<ons-template id="page1.html">
+  <ons-page id="page1">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+      <div class="content" style="text-align: center" >
+        <br/>
+            <img src="image/0710.png" id="title">
+            <br/>
+            <br/>
+            <!--<a href="" class="toptitle" >タイトル</a>-->
+            <br/>
+            <br />
+                <ons-button id="bluebutton"name="Game_Start" onClick="document.querySelector('#navigator').pushPage('page2.html',{ animation: 'fade'})">ゲームを始める</ons-button>
+
+            <br/>
+            <br/>
+                <!--<p><input type="button"name="continued"class="button"value="続きから再開"/></p>-->
+                <ons-button id="bluebutton" onClick="Continue()" >続きから</ons-button>
+                <br/>
+                <br/>
+
+               <ons-button id="bluebutton" onClick="document.querySelector('#navigator').pushPage('page24.html',{ animation: 'fade'});">オプション</ons-button>
+      </div>
+  </ons-page>
+</ons-template>
+
+<!--GMルール画面-->
+<ons-template id="page2.html">
+  <ons-page id="page2">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+      <ons-button id="back-button" onClick="document.querySelector('#navigator').pushPage('page1.html',{ animation: 'fade'});"><a id="text">BACK</a></ons-button>
+        <div class="content" style="text-align: center">
+        <h2>ストーリー</h2>
+        <div class="textZone" style="text-align:center;">
+        <table bgColor="#ffffff"><tr><td>
+          近年、事務作業を行う人達による不正が後を絶たない・・<br><br>
+
+          ある夜、組織における自身の処遇に憤りを感じ、<br>コンピューターやネットワークの扱いに長けた<br>「ブラックハットハッカー」の協力を得て、<br>
+          「汚職者」は営業秘密の不正取得を行った。<br><br>
+
+          汚職者は自身の自尊心を傷つけた者たちに<br>
+          罪を擦り付けるべく、毎晩犯行に及ぶ。<br><br>
+
+          経営者はこの一連の事件に対し、セキュリティ専門家に<br>
+          よって結成されたチーム。「CSIRT」を設立した<br><br>
+
+          「CSIRT」は個々の専門性に基づいて<br>
+          被疑者との面接による不正調査を開始する<br><br>
+
+          組織の治安を取り戻すに行われたのは<br>
+          「毎日一人の解雇者を決める」というものだった<br><br>
+
+          「CSIRT」は組織に蔓延る<br>「汚職者」を突き止める事が出来るのだろうか・・・<br><br>
+        </table>
+        </div>
+
+        <br />
+            <ons-button id="bluebutton" onClick="redraw_page3()" class="blueButton">ENTER</ons-button>
+            <!--<img src="image/OK3.jpg" onClick="redraw_page3()" id="push-button">-->
+
+        </div>
+  </ons-page>
+</ons-template>
+
+<ons-template id="page24.html">
+  <ons-page id="page24">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <ons-button id="back-button" onClick="document.querySelector('#navigator').popPage();">back</ons-button>
+      <div class="content" style="text-align: center">
+        <h2>オプション</h2>
+            <div id="story"></div>
+            <ons-button id="bluebutton" onclick="op_1()">ゲーム設定</ons-button>
+            <br/>
+            <br />
+            <ons-button id="bluebutton" onclick="op_2()">利用規約</ons-button>
+            <br/>
+            <br />
+            <ons-button id="bluebutton" onclick="op_3()">著作権情報</ons-button>
+            <br/>
+            <br/>
+            <ons-button id="bluebutton" class="page3_button" onclick="evaluation()">レビュー</ons-button>
+
+            <!--<div id="syousaisettei"></div>
+            <br />
+            <ons-button id="push-button" class="page3_button" onclick="op_4()">利用規約</ons-button>
+            <br />
+            -->
+      </div>
+  </ons-page>
+</ons-template>
+
+  <!--プレイヤー入力画面-->
+<ons-template id="page3.html" onLoad="redraw_page3()">
+  <ons-page id="page3">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+      <div id="right"><ons-button id="right-button" onClick="document.querySelector('#navigator').resetToPage('page1.html',{ animation: 'fade'});">TITLE</ons-button></div>
+      <div class="content" style="text-align: center">
+        <h2>プレイヤーセット</h2>
+
+        <!--
+        <p><ons-button id="push-button2" onClick="document.querySelector('#navigator').pushPage('page8.html');">プレイヤー追加</ons-button>
+        <ons-button id="push-button" onClick="document.querySelector('#navigator').pushPage('page4.html');">人数確定</ons-button></p>-->
+        <!--<form name="form1" action="">-->
+
+          <input id="name" name="textBox1" type="text" value=""  maxlength="10"/>
+          <ons-button onClick="nameText()" id="mini-button">追加</ons-button>
+        <!--</form>-->
+
+        <br />
+        <div id="namelist_page8" name="namelist_page8" ></div>
+        <br />
+
+        <ons-button id="page3_reset" onclick="reset()">クリア</ons-button>
+        <ons-button id="page3_reset" onclick="redraw_page4()">次へ</ons-button>
+        <br/>
+        <br/>
+        <br/>
+
+
+      </div>
+  </ons-page>
+</ons-template>
+
+  <!--ゲーム詳細画面-->
+<ons-template id="page5.html">
+  <ons-page id="page5">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <div id="left"><ons-button id="back-button" onClick="document.querySelector('#navigator').popPage();">Back</ons-button></div>
+      <div class="content" style="text-align: center">
+        <div class="skeleton">
+        <h2>GameSetting</h2>
+        <p id="futosi">ノーティフィケーション:<samp id="haibun_murabito"></samp></p>
+        <p id="futosi">汚職者:<samp id="haibun_osyokusya"></samp></p>
+        <p id="futosi">フォレンジックエンジニア:<samp id="haibun_uranai"></samp></p>
+        <p id="futosi">リサーチャー:<samp id="haibun_reibai"></samp></p>
+        <p id="futosi">コマンダー:<samp id="haibun_kisi"></samp></p>
+        <p id="futosi">ブラックハットハッカー:<samp id="haibun_kyoujin"></samp></p>
+        <br/>
+        </div>
+        <br/>
+        <!--<ons-button  onClick="haibun();">配分表示</ons-button>-->
+        <div id="murabito"></div>
+
+
+        <ons-button id="bluebutton" onClick="document.querySelector('#navigator').pushPage('page25.html',{ animation: 'fade'});">GameStart</ons-button>
+
+      </div>
+  </ons-page>
+</ons-template>
+
+<!--占い結果画面-->
+<ons-template id="page16_1.html">
+  <ons-page id="page16_1">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <div class="content" style="text-align: center">
+      <div class="skeleton">
+        <h2>CSIRT側</h2>
+          <br/>
+        <img src="image/CSIRT_side.png" class="image" id="CSIRTSide" />
+          <br/>
+        <div class="tutorial">
+        <div id="futosi">調査の結果はCSIRT陣営の人でした。</div>
+        <div id="futosi">ENTERを押して次の人に端末を渡してください。</div>
+        </div>
+      <br />
+      </div>
+      <br/>
+      <ons-button id="bluebutton" onclick="next_player()">ENTER</ons-button>
+    </div>
+  </ons-page>
+</ons-template>
+
+<ons-template id="page16_2.html">
+  <ons-page id="page16_2">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <div class="content" style="text-align: center">
+      <div class="skeleton">
+      <h2>汚職者側</h2>
+        <br/>
+      <img src="image/Cyer_side.png" class="image" id="osyokuSide" />
+        <br/>
+      <div class="tutorial">
+      <div id="">調査の結果はサイバー犯罪者陣営の人でした。</div>
+      <div >ENTERを押して次の人に端末を渡してください。</div>
+      </div>
+        <br />
+      </div>
+        <br/>
+      <ons-button id="bluebutton" onclick="next_player()">ENTER</ons-button>
+    </div>
+  </ons-page>
+</ons-template>
+
+
+
+  <!--何日目の夜表示-->
+<ons-template id="page6.html">
+  <ons-page id="page6">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <div class="content" style="text-align: center">
+      <br/>
+      <div class="skeleton">
+      <br/>
+      <br/>
+    <div id="nightset" ></div>
+    <samp>PlayerName</samp>
+    <h2 id="page6_name"></h2>
+    <p>上記プレイヤーはENTERボタンを押して</p><p>アクションを行ってください</p>
+      <br/>
+      </div>
+      <br/>
+    <ons-button id="bluebutton" onClick="page6_ENTER()">ENTER</ons-button>
+
+
+    </div>
+  </ons-page>
+</ons-template>
+
+      <!--以下役職ごとのページ  -->
+<!--汚職者-->
+<ons-template id="page7_0.html">
+  <ons-page id="page7_0">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <div class="content" style="text-align: center">
+      <br/>
+      <div class="skeleton">
+      <br/>
+        <h2>汚職者</h2>
+        <img  class="image" id="osyoku">
+         <br/>
+        <samp id="futosi"><!--説明文-->
+	      <p>あなたは汚職者です。</p>
+        <p>今夜、解雇するプレイヤーを1人選んでください。</p>
+		    <p>汚職者が２人以上いる場合、<br/>汚職者は他の汚職者を知ることが出来ます。</p>
+        </samp>
+        <div id="textset">汚職者メンバー</div>
+        <div id="jinrou_nem"></div>
+        <div id="page7_0_satugai"></div>
+        <div id="namebutton0"></div>
+          <br />
+      </div>
+      <br/>
+      <br/>
+        <ons-button id="push-button" onclick="next_player()">次の人へ</ons-button>
+    </div>
+  </ons-page>
+</ons-template>
+
+<!--ノーティフィケーション-->
+<ons-template id="page7_1.html">
+  <ons-page id="page7_1">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <div class="content" style="text-align: center">
+      <br/>
+      <div class="skeleton">
+        <div class="tutorial">
+      <p id="futosi">CSIRT陣営</p>
+      <h2>ノーティフィケーション</h2>
+      <img  class="image" id="csirt">
+      <samp id="textset"><!--説明文-->
+      <p id="futosi">あなたはノーティフィケーションです。</p>
+		  <p id="futosi">あなたが汚職者だと思うプレイヤーを<br/>1人選んでください。<br/>
+			最も汚職者だと思われているプレイヤーが<br/>翌朝公表されます</p>
+      </samp>
+      </div>
+      <div id="page7_sentaku"></div>
+      <div id="namebutton1"></div>
+      <br />
+      </div>
+      <br/>
+      <ons-button id="push-button" onclick="next_player()">次の人へ</ons-button>
+    </div>
+  </ons-page>
+</ons-template>
+
+
+<!--フォレンジックエンジニア-->
+<ons-template id="page7_2.html">
+  <ons-page id="page7_2">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <div class="content" style="text-align: center">
+      <br/>
+      <div class="skeleton">
+      <div class="tutorial">
+      <p id="futosi">CSIRT陣営</p>
+      <h2>フォレンジックエンジニア</h2>
+      <img  class="image" id="forensic">
+      <br/>
+      <samp id="futosi"><!--説明文-->
+	    <p>あなたはフォレンジックエンジニアです。</p>
+		  <p>あなたは、シーサート陣営かサイバー犯罪者陣営か<br/>確認したいプレイヤーを選んでください</p>
+			<p>証拠調査によって、選んだプレイヤーが汚職者か<br/>どうか知ることが出来ます。</p>
+			<p>汚職者には「汚職者」、それ以外には<br/>シーサート陣営と表示されます。</p>
+      </samp>
+      </div>
+      <br/>
+      <br/>
+      <samp id="textset"></samp>
+      <div id="page7_uranai"></div>
+      <div id="namebutton2"></div>
+      <br />
+      </div>
+      <ons-button id="push-button" onclick="next_player()">次の人へ</ons-button>
+    </div>
+  </ons-page>
+</ons-template>
+
+<!--リサーチャー-->
+<ons-template id="page7_3.html">
+  <ons-page id="page7_3">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <div class="content" style="text-align: center">
+      <br/>
+      <div class="skeleton">
+      <div class="tutorial">
+      <p id="futosi">CSIRT陣営</p>
+      <h2>リサーチャー</h2>
+      <img class="image" id="researcher">
+      <br/>
+      <samp id="futosi"><!--説明文-->
+	    <p>あなたはリサーチャーです。</p>
+		  <p>あなたが汚職者だと思うプレイヤーを<br/>1人選んでください。</p>
+			<p>最も汚職者だと思われている<br/>プレイヤーが翌朝公表されます。</p>
+		  <p>追跡調査を実施し、解雇されたプレイヤーの<br/>陣営を知ることが出来ます。<br/>
+		  汚職者には「汚職者」、<br/>それ以外にはCSIRT陣営と表示されます。</p>
+      </samp>
+      </div>
+      <div id='page7_3_gisei'></div>
+      <div id="page7_3_giseisya"></div>
+      <div id="page7_sentaku"></div>
+      <div id="namebutton3"></div>
+      <br />
+      </div>
+
+      <br/>
+      <ons-button id="push-button" onclick="next_player()">次の人へ</ons-button>
+    </div>
+  </ons-page>
+</ons-template>
+
+<!--コマンダー-->
+<ons-template id="page7_4.html">
+  <ons-page id="page7_4">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <div class="content" style="text-align: center">
+      <br/>
+      <div class="skeleton">
+      <div class="tutorial">
+      <p id="futosi">CSIRT陣営</p>
+      <h2>コマンダー</h2>
+      <img class="image" id="commander">
+      <br/>
+      <samp id="futosi"><!--説明文-->
+	    <p>あなたはコマンダーです。</p>
+		  <p>あなたが守りたいプレイヤーを1人選んでください。<br/>
+			護衛調査を実施し1人だけ<br/>汚職者からプレイヤーを守ることが出来ます。<p>
+      </samp>
+      </div>
+      <br/>
+      <br/>
+      <div id="page7_mamori"></div>
+      <div id="namebutton4"></div>
+      <br />
+      </div>
+
+      <br/>
+      <ons-button id="push-button" onclick="next_player()">次の人へ</ons-button>
+    </div>
+  </ons-page>
+</ons-template>
+
+<!--ブラックハットハッカー-->
+<ons-template id="page7_5.html">
+  <ons-page id="page7_5">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <div class="content" style="text-align: center">
+      <br/>
+      <div class="skeleton">
+      <div class="tutorial">
+      <h2>ブラックハットハッカー</h2>
+      <img class="image" id="black">
+      <br/>
+      <samp id="futosi"><!--説明文-->
+	    <p>あなたはブラックハットハッカーです。</p>
+		  <p>あなたがCSIRT陣営だと思う<br/>プレイヤーを1人選んでください。<br/>
+      最も汚職者だと思われている<br/>プレイヤーが翌朝公表されます。</p>
+			<p>ブラックハットハッカーの勝利条件は<br/>サイバー犯罪者側陣営の勝利です。<br/></p>
+			<p>また、専門調査による調査結果は、<br/>「CSIRT陣営」と表示されます。</p>
+      </samp>
+      </div>
+      <br/>
+      <div id="page7_sentaku"></div>
+      <div id="namebutton5"></div>
+      <br />
+       </div>
+      <br/>
+      <ons-button id="push-button" onclick="next_player()">次の人へ</ons-button>
+    </div>
+  </ons-page>
+</ons-template>
+
+<!--プレイヤー入力画面-->
+<ons-template id="page8.html">
+  <ons-page id="page8" name="page8">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <div id="right">
+      <ons-button id="right-button" onClick="document.querySelector('#navigator').pushPage('page3.html',{ animation: 'fade'});">ENTER</ons-button>
+    </div>
+    <div class="content" style="text-align: center">
+      <h2>PlayerSet</h2>
+      <!--↓プレイヤー追加テキスト-->
+      <form name="form1" action="">
+        <input id="name" name="textBox1" type="text" value="" />
+        <ons-button onClick="nameset()">追加</ons-button>
+      </form>
+      <hr />
+      <div id="namelist_page8" name="namelist_page8"></div>
+    </div>
+  </ons-page>
+</ons-template>
+
+<!--朝になる直前の画面-->
+<ons-template id="page9.html">
+  <ons-page id="page9">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <div class="content" style="text-align: center">
+      <br/>
+      <div class="skeleton">
+      <br/>
+      <br/>
+    <div id="morningset"></div>
+    <samp>PlayerName</samp>
+    <h2 id="page9_name"></h2>
+    <p>上記プレイヤーはENTERボタンを押して</p><p>アクションを行ってください</p>
+      <br/>
+      </div>
+      <br/>
+
+      <ons-button id="bluebutton" onclick="discussion()">ENTER</ons-button>
+    </div>
+  </ons-page>
+</ons-template>
+
+
+
+<!--タイマーページ-->
+<ons-template id="page11.html">
+  <ons-page id="page11">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <div class="content" style="text-align: center">
+      <div id ="box">
+      <h1 id="default">03：00</h1>
+      <ons-button id="start" onclick="count_start()">スタート</ons-button>
+      <ons-button id="stop" onclick="count_stop()">ストップ</ons-button>
+      <ons-button id="rset" onclick="count_reset()">リセット</ons-button>
+      </div>
+      <br/>
+      <br/>
+      <ons-button id="timeup_button" onclick="page13_load();test19();">話し合いを終える</ons-button>
+    </div>
+  </ons-page>
+</ons-template>
+
+
+<!--朝になった画面-->
+<ons-template id="page12.html">
+  <ons-page id="page12">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <div class="content" style="text-align: center">
+      <div class="skeleton">
+      <h2>朝になりました</h2>
+      <div id="gisei"></div>
+      <div id="page12_maebunn"></div>  <!-- 追加　-->
+      <div id="page12_ayasii"></div>   <!-- 追加　-->
+      <p id="page12_text"></p>
+      <br />
+      </div>
+      <br/>
+      <ons-button id="bluebutton" onclick=" page14_load();">ENTER</ons-button>
+    </div>
+  </ons-page>
+</ons-template>
+
+<!--投票画面-->
+<ons-template id="page13.html">
+  <ons-page id="page13">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <div class="content" style="text-align: center">
+      <div class="skeleton">
+    <h2>投票</h2>
+    <h3 id = "touhyou00"></h3>
+      </div>
+    <div id="touhyou"></div>
+    <br />
+    </div>
+  </ons-page>
+</ons-template>
+
+<!--投票結果画面-->
+<ons-template id="page14.html">
+  <ons-page id="page14">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <div class="content" style="text-align: center">
+      <div class="skeleton">
+      <h2>投票結果</h2>
+      <h3 id="satugaikeltuka"></h3>
+      <br/>
+      <p>以降上記プレイヤーは、<br/>ゲーム終了まで話してはいけません。</p>
+      </div>
+    <br/>
+      <ons-button id="bluebutton" onclick="page14_load()">ENTER</ons-button>
+    </div>
+  </ons-page>
+</ons-template>
+
+
+
+
+<!--ゲーム終了結果画面-->
+<ons-template id="page15.html">
+  <ons-page id="page15">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <div class="content" style="text-align: center">
+      <div class="skeleton">
+      <h2>リザルト</h2>
+      <h3 id="result"></h3>
+      <ul id="a"><li></li></ul>
+      <div id="futosi"></div>
+      <br />
+      </div>
+      <br/>
+      <ons-button id="bluebutton" onclick="page15_last()">ENTER</ons-button>
+    </div>
+  </ons-page>
+</ons-template>
+
+
+
+<!--朝の怪しい人画面-->
+<ons-template id="page13_2.html">
+  <ons-page id="page13_2">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <div class="content" style="text-align: center">
+      <br/>
+      <div class="skeleton">
+        <br/>
+      <h2>朝になりました</h2>
+      <h3>一番『汚職者』と疑われている人は</h3>
+      <div id="murabito_keltuka"></div>
+      <br />
+      </div>
+      <br/>
+      <ons-button id="bluebutton" onclick="keltuka_murabit()">ENTER</ons-button>
+    </div>
+  </ons-page>
+</ons-template>
+
+<!--何日目の夜になったかの画面-->
+<ons-template id="page17.html">
+  <ons-page id="page17">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <div class="content" style="text-align: center">
+      <br/>
+      <div class="skeleton">
+      <h2 id="page17_night"></h2>
+      <div id="page17_text"></div>
+      <br />
+      <p id="textset">名前を入力した順番に<br/>夜の行動を行ってください。</p>
+      <br/>
+      </div>
+
+      <br/>
+      <ons-button id="bluebutton" onclick="Confirmation()">ENTER</ons-button>
+    </div>
+  </ons-page>
+</ons-template>
+
+
+
+
+<!--役職人数設定画面-->
+<ons-template id="page4.html">
+  <ons-page id="page4">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <div id="right"><ons-button id="back-button" onClick="document.querySelector('#navigator').popPage();">Back</ons-button></div>
+
+      <div class="content">
+        <h2>GAME SETTING</h2>
+        <div class="skeleton">
+          <p class="CitizenSide">CSIRT側</p>
+
+            <div class="murabito">
+                <div class="page4_img">
+                  <img  alt="ノーティフィケーション"class="player" align="middle" id="csirt" />
+                </div>
+                <div class="page4_text">
+                  <p class="page4_midasi">ノーティフィ<br>&emsp;&emsp;&emsp;&emsp;ケーション</p>
+                  <samp id="textset">サイバー犯罪者陣営を<br>解雇させる基本プレイヤー</samp>
+                  <div class="YakusyokuSenter">
+                    <h3 id="murabitonum">0</h3>
+                  </div>
+                </div>
+            </div>
+
+<br><br>
+
+          <div class="bousyoku">
+              <div class="page4_img">
+                <img alt="フォレンジックエンジニア"class="player" align="middle" id="forensic"/>
+              </div>
+                <div class="page4_text">
+                  <p class="page4_midasi">フォレンジック<br>&emsp;&emsp;&emsp;&emsp;エンジニア</p>
+                  <samp id="textset">夜にプレイヤーが汚職者か<br>どうかを知ることができる</samp>
+
+                  <div class="YakusyokuSenter">
+                    <h3 id="uranainum">0</h3>
+                    <img src="image/2324b.png" onclick="add_uranai_plus_num()" class="change"/>
+                    &emsp;
+                    <img src="image/2324c.png" onclick="add_uranai_num()" class="change"/>
+                  </div>
+                </div>
+          </div>
+
+<br><br><br>
+
+          <div class="bousyoku">
+            <div class="page4_img">
+              <img  alt="リサーチャー"class="player" align="middle" id="researcher"/>
+            </div>
+            <div class="page4_text">
+              <p class="page4_midasi">リサーチャー</p>
+              <samp id="textset">解雇されたプレイヤーが<br/>汚職者かどうかを知ることが<br/>できます</samp>
+              <div class="YakusyokuSenter">
+                <h3 id="reibai">0</h3>
+                <img src="image/2324b.png" onclick="add_reibai_plus_num()" class="change"/>
+                &emsp;
+                <img src="image/2324c.png" onclick="add_reibai_num()" class="change"/>
+              </div>
+            </div>
+          </div>
+
+<br><br><br>
+
+          <div class="bousyoku">
+                <div class="page4_img">
+                    <img  alt="コマンダー"class="player" align="middle" id="commander"/>
+                </div>
+                <div class="page4_text">
+                    <p class="page4_midasi">コマンダー</p>
+                    <samp id="textset">毎晩、汚職者から<br>守りたいプレイヤーを<br>守ることができます</samp>
+                    <div class="YakusyokuSenter">
+                      <h3 id="kisi">0</h3>
+                      <img src="image/2324b.png" onclick="add_kisi_plus_num()" class="change">
+                      &emsp;
+                      <img src="image/2324c.png" onclick="add_kisi_num()" class="change">
+                    </div>
+                </div>
+          </div>
+
+        </div>
+
+<br><br><br>
+
+      <div class="skeleton">
+        <p class="WolfSide">サイバー犯罪者陣営</p>
+
+          <div class="murabito">
+            <div class="page4_img">
+              <img  alt="汚職者"class="player" align="middle" id="osyoku"/>
+            </div>
+            <div class="page4_text">
+                <p class="page4_midasi">汚職者</p>
+                <samp id="textset">CSIRT陣営を解雇させる<br/>プレイヤー</samp>
+              <div class="YakusyokuSenter">
+                <h3 id="bousyokunum">1</h3>
+                <img src="image/2324b.png" onclick="add_bousyoku_plus_num()" class="change"/>
+                &emsp;
+                <img src="image/2324c.png" onclick="add_bousyoku_num()" class="change"/>
+              </div>
+            </div>
+          </div>
+
+ <br><br><br>
+
+          <div class="bousyoku">
+                <div class="page4_img">
+                  <img  alt="ブラックハットハッカー"class="player" align="middle" id="black"/>
+                </div>
+                <div class="page4_text">
+                  <p class="page4_midasi">ブラック<br>&emsp;&emsp;&emsp;ハットハッカー</p>
+                  <samp id="textset">サイバー犯罪者陣営に属する<br>CSIRTプレイヤーです</samp>
+                  <div class="YakusyokuSenter">
+                    <h3 id="kyoujin">0</h3>
+                    <img src="image/2324b.png" onclick="add_kyoujin_plus_num()" class="change"/>
+                    &emsp;
+                    <img src="image/2324c.png" onclick="add_kyoujin_num()" class="change"/>
+                  </div>
+                </div>
+          </div>
+      </div>
+
+
+   <br><br><br>
+
+            <div style="text-align: center">
+              <ons-button id="page4_push-button"  onClick="job_set();">ENTER</ons-button>
+            </div>
+            <br/>
+            <br/>
+
+
+    </div>
+  </ons-page>
+</ons-template>
+
+<ons-template id="page25.html">
+  <ons-page id="page25">
+        <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+      <div class="tutorial">
+        <h2>ルール説明</h2>
+        <h3></h3>
+        <div id="textset" class="skeleton" style="text-align:center">
+        ゲームの設定が完了しました。
+        <br />
+        それではゲームの遊び方を紹介します。
+        <br/>
+        (不要な方は、読み飛ばしてください)</div>
+        <br/>
+        <table bgColor="#ffffff" id="tutorial_TB"><tr><td>
+        <samp id="futosi">ゲーム進行</samp><br/><br/>
+        <samp id="textset">進行役のゲームマスターは<br/>名前を入力した順の<samp style="color:red;">最初の人が行います。</samp></samp>
+        <br/>
+        <samp id="textset">進行は下記の1〜3を繰り返します。</samp>
+<p id="futosi">1 夜の時間</p>
+	<p id="textset">初日は各プレイヤーの役職を確認します。</br>2日目以降は各自の役職行動を行います。</p>
+<br/>
+<p id="futosi">2 昼の時間</p>
+	<p id="textset">残されたプレイヤー同士で議論を行い、</br>誰が汚職者かを推理します。</p>
+<br/>
+<p id="futosi">3 夕方の時間</p>
+	<p id="textset">議論の結果、自分が汚職者だと思う人に投票します。票数が最も多い人は解雇されます。</p>
+<br/>
+<p id="futosi">勝利条件</p>
+<p id="textset">・会社内のすべての汚職者を解雇できれば</br>「CSIRT陣営」の勝利になります。</p>
+<p id="textset">・CSIRT陣営とサイバー犯罪者陣営の人数が同じに</br>できれば「サイバー犯罪者陣営」の勝利になります。</p></table>
+<br/>
+</table>
+        <div id="tutorial-button"><ons-button id="bluebutton" onclick="page5_GameStart()">ENTER</ons-button></div>
+      </div>
+  </ons-page>
+</ons-template>
+
+
+<ons-template id="page27.html">
+  <ons-page id="page27">
+        <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+            <ons-button id="back-button" onClick="document.querySelector('#navigator').popPage();">back</ons-button>
+      <div class="tutorial">
+
+        <br/>
+        <table bgColor="#ffffff" id="tutorial_TB"><tr><td>
+                <h2>著作権情報</h2>
+          <p id="futosi">アシアル株式会社</p>
+          <p>COPYRIGHT ASIAL CORPORATION. ALL RIGHTS RESERVED.</p>
+
+          <p id="futosi">いらすとや</p>
+          <p>© いらすとや. All Rights Reserved.</p>
+
+
+          <p id="futosi">学校法人岩崎学園情報科学専門学園</p>
+          <p>© IWASAKI GAKUEN. ALL RIGHTS RESERVED.</p>
+
+          <p><p id="futosi">特定非営利活動法人日本ネットワークセキュリティ協会</p>
+          <p>Copyright (C)  Japan Network Security Association. All rights reserved.</p>
+
+          <p id="futosi">Monaca</p>
+          <p>COPYRIGHT ASIAL CORPORATION. ALL RIGHTS RESERVED.</p>
+
+
+          <p id="futosi">Onsen UI</p>
+          <p>COPYRIGHT ASIAL CORPORATION. ALL RIGHTS RESERVED</p>
+
+            <p id="futosi">Apache License</p>
+            <p>Copyright 2019 © IWASAKI GAKUEN. ALL RIGHTS RESERVED.</p>
+            <samp>
+              Licensed under the Apache License, Version 2.0 (the "License");
+              you may not use this file except in compliance with the License.
+              You may obtain a copy of the License at
+<br/><br/>
+              http://www.apache.org/licenses/LICENSE-2.0
+<br/><br/>
+              Unless required by applicable law or agreed to in writing, software
+              distributed under the License is distributed on an "AS IS" BASIS,
+              WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+              See the License for the specific language governing permissions and
+              limitations under the License.
+            </samp>
+
+
+        </table>
+<br/>
+      </div>
+  </ons-page>
+</ons-template>
+
+    <!-- 以下機能関係ない追加ページ -->
+
+<!--ゲーム設定画面-->
+<ons-template id="page20.html">
+  <ons-page id="page20">
+     <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <ons-button id="back-button" onClick="document.querySelector('#navigator').popPage();">back</ons-button>
+      <div class="content" style="text-align: center">
+        <h2>ゲーム設定</h2>
+        <h3></h3>
+        <div id="murabito_keltuka"></div>
+        <div class="skeleton">
+        <h3>画像変更</h3>
+        <label>
+        <input type="radio" name="image_set" onclick="img_switch1()"class="radio" id="image_set1"/><img src="image2/csirt.png" class="radio_image">
+        </label>
+        <label>
+        <input type="radio" name="image_set" onclick="img_switch2()" class="radio" id="image_set2" /><img src="image/simin.png" class="radio_image">
+        </label>
+        <br/>
+        <p id="img_title">学生制作イラスト</p>
+        <br/>
+        </div>
+    </div>
+        <br />
+  </ons-page>
+</ons-template>
+
+<!--利用規約-->
+
+<ons-template id="page21.html">
+  <ons-page id="page21">
+        <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+            <ons-button id="back-button" onClick="document.querySelector('#navigator').popPage();">back</ons-button>
+      <div class="tutorial">
+
+        <br/>
+        <table bgColor="#ffffff" id="tutorial_TB"><tr><td>
+<h2>利用規約</h2>
+
+<p>セキュリティ専門家人狼アプリ 利用規約</p>
+<samp>　本利用規約（以下「本規約」といいます）は、情報科学専門学校（以下「開発者」といいます）が本アプリを提供するサービスの利用条件を定めるものです。<br/>　利用者は本サービスを利用することにより、本規約に同意したものとみなします。<br/>
+　不同意の意思表示は、本サービスを利用しないことをもってのみ認められるものとします。</samp><br/>
+<p id="futosi">第１条（定義および目的）</p>
+<samp>　「本アプリ」とは、セキュリティに興味及び関心を持ってもらうことを目的に、開発者が利用者に提供するアプリケーションです。本規約は、本アプリのサービスの利用に伴い必要となる事項を定めることを目的とします。</samp><br/>
+<p id="futosi">第２条（商標権）</p>
+<samp>　当アプリに掲載される個々の商標・ロゴマーク、商号に関する権利は、当校または当校に使用を認めた権利者に帰属します。</samp><br/>
+<samp>　商標法権その他の法律により認められる場合を除き、これらを当校の許諾を得ることなく使用等する行為は商標権法等により禁止されていますので、事前に当校にご連絡の上、許諾を得ていただくようお願いいたします。</samp><br/>
+<p id="futosi">第３条（著作権）</p>
+<samp>　本アプリのソースコードはApache License, Version 2.0を適用しております。その他当アプリに表示される文章、画像等すべての情報に関する著作権は、当校または当校に使用を認めた権利者に帰属します。</samp><br/>
+<samp>　なお、利用者への本アプリの使用許諾は、利用者に対する何らの権利移転等を意味するものではありません。個人的な利用目的による印字、保存や、その他著作権法によって認められる範囲を超えて当アプリの表示内容を使用（複製、改ざん、転載、配布等）することはできません。</samp><br/>
+
+<p id="futosi">第４条（使用許諾）</p>
+<samp>　開発者は、利用者に対し、本規約に従い、本アプリを本目的の範囲内に限り使用することのできる非独占的かつ譲渡不能の権利を許諾します。また本アプリ内で使用されている画像の使用に関しましては、第３条「著作権」で記述している各帰属先にお問い合わせください。</samp><br/>
+<p id="futosi">第５条（本アプリの変更および削除）</p>
+<samp>　開発者は、利用者へ事前に通知することなく、本アプリの内容を変更することができます。本アプリの内容が変更された場合、利用者は変更後の本アプリを使用することができますが、ソフトウェア更新等開発者所定の操作を行っていただくことがあります。</samp><br/>
+<p id="futosi">第６条（本規約の変更および終了）</p>
+<samp>　開発者は、利用者へ事前に通知することなく、本規約を変更または終了させることができます。この場合、本規約の変更または終了の旨をGitHubのセキュリティ専門家人狼アプリのページに掲載し、またはこれと同等の方法により利用者に対し周知するものとし、当該いずれかの方法による周知を開始した時点をもって本規約は変更されまたは終了するものとします。</samp><br/>
+<samp>　なお、第３条「著作権」、第６条「本規約の変更および終了」、第７条「禁止事項」、第８条「責任制限」、第９条「損害賠償等」、第１１条「その他の注意事項」に記載の内容については、本規約が終了した後であっても有効に存続するものとします。</samp><br/>
+<p id="futosi">第７条（禁止事項）</p>
+<samp>　利用者は、本アプリを本目的以外のために使用してはならないものとします。利用者は、本アプリの全部または一部を、複製、改変もしくは変換することはできません。</samp><br/>
+<samp>　利用者は、本アプリの全部または一部を、有償または無償を問わず第三者に販売、頒布、送信可能化、公衆送信、貸与、譲渡、使用許諾その他の処分をすることはできません。</samp><br/>
+<samp>　利用者は、本アプリまたはコンテンツを含む利用者が取得する各種情報に付されている著作権表示またはその他の権利表示を削除したり、変更したりすることはできません。</samp><br/>
+<samp>　また、本アプリまたはコンテンツを含む利用者が取得する各種情報を、開発者もしくは第三者の知的財産権もしくはその他の権利を侵害し、または利益を損なう態様で使用することはできません。</samp><br/>
+<samp>　利用者は、本アプリを個人的かつ非商業的な目的に限り使用することができるものとし、開発者が承諾した場合を除き、営利目的のために使用することはできません。</samp><br/>
+<samp>　利用者は、本アプリを公序、良俗に反する行為に使用することはできません。</samp><br/>
+<p id="futosi">第８条（責任制限）</p>
+<samp>　本アプリの使用は、利用者自身の責任において行うものとします。開発者は、利用者に対し、本アプリの不具合等がないこと、および特定の目的や機器に対する適応性に対し、なんら保証せず、また、利用者が本アプリを使用したことまたは使用できなかったことに起因して利用者または第三者が被った直接的または間接的な損害について、一切責任を負いません。</samp><br/>
+<samp>　開発者は、利用者が第三者に本アプリを使用させることにより、利用者または第三者が被った損害について、一切責任を負いません。</samp><br/>
+<samp>　開発者は、本アプリ上または本アプリからアクセスすることができるインターネット上に掲載される各種情報を利用者が取得・利用したことまたは取得・利用できなかったことにより利用者が被った損害について、一切責任を負いません。
+<samp>　開発者は、システムの保守・点検を行う場合、システムの障害等により本アプリの各機能の提供ができなくなった場合、または開発者が運用上もしくは技術上やむを得ず本アプリの各機能の一時中止が必要であると判断した場合には、利用者に事前に通知することなく、本アプリの各機能の全部または一部の提供を中止することがあり、これらの場合により利用者が被った損害について、一切責任を負いません。</samp><br/>
+<p id="futosi">第９条（損害賠償等）</p>
+<samp>　利用者が本契約に違反した場合は、開発者は、本規約に基づく利用者への使用許諾を撤回し、本アプリサービスの提供を終了させることができます。</samp><br/>
+<samp>　利用者による本規約の違反に起因して開発者が損害を被った場合、開発者は、当該損害の賠償を利用者に請求することができるものとします。</samp><br/>
+<p id="futosi">第１０条（通信の利用）</p>
+<samp>　本アプリの使用にあたっては、アプリのバージョンアップ等に伴い通信を利用して各種情報を送受信することがあり、それにともない発生する通信料は利用者に負担いただきます。</samp><br/>
+
+<p id="futosi">第１１条（その他の注意事項）</p>
+<samp>　利用者は、本アプリを日本国内においてダウンロードして使用するものとします。本アプリを国外に持ち出す場合、日本国および諸外国の輸出入関連法規類を遵守するものとし、それらに違反した行為により生じるいかなる問題についても、利用者自身の責任でこれを解決するものとします。本規約の一部が準拠法に抵触し、または裁判の判決等により無効や違法とされた場合であっても、他の規定は影響を受けることなく効力を有するものとします。</samp><br/>
+
+
+</table>
+<br/>
+      </div>
+  </ons-page>
+</ons-template>
+
+<ons-template id="page22.html">
+  <ons-page id="page22">
+         <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <ons-button id="back-button" onClick="document.querySelector('#navigator').popPage();">back</ons-button>
+    <div class="content" style="text-align: center">
+      <h2>利用規約</h2>
+      <h3></h3>
+      <div id="murabito_keltuka"></div>
+      <br />
+      <br/>
+    </div>
+  </ons-page>
+</ons-template>
+
+
+<ons-template id="page23.html">
+  <ons-page id="page23">
+         <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <ons-button id="back-button" onClick="document.querySelector('#navigator').popPage();">back</ons-button>
+    <div class="content" style="text-align: center">
+      <h2>プライバシーポリシー</h2>
+      <h3></h3>
+      <div id="murabito_keltuka"></div>
+      <br />
+      <br/>
+    </div>
+  </ons-page>
+</ons-template>
+
+
+
+
+
+<ons-template id="page13_ebeab.html">
+  <ons-page id="page13_ecwvdv">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <div class="content" style="text-align: center">
+      <br/>
+      <h2>朝になりました</h2>
+      <h3>今一番『汚職者』だと思われている人は</h3>
+      <div id="murabito_keltuka"></div>
+      <br />
+      <ons-button id="push-button" onclick="keltuka_murabit()">ENTER</ons-button>
+    </div>
+  </ons-page>
+</ons-template>
+
+
+<ons-template id="page26.html">
+  <ons-page id="page26">
+    <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
+    <div class="content" style="text-align: center">
+      <br/>
+      <div class="skeleton">
+      <h2>これより話し合いを開始します。</h2>
+      <p id=textset>夜に得た情報をもとに話し合いを行ってください。</p>
+      <br />
+      </div>
+      <br/>
+      <ons-button id="bluebutton" onclick="testbutton()">ENTER</ons-button>
+    </div>
+  </ons-page>
+</ons-template>
+
+
+</body>
+</html>
