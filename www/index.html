@@ -1258,6 +1258,7 @@ function touhyou_satugai00(){
   localStorage.setItem('Cntmadman_j',Cntmadman);
   localStorage.setItem('gamehantei_j',gamehantei);
   localStorage.setItem('W_j',W);
+  localStorage.setItem('x_j',x);
 }
 
 //ローカルストレジからの値取得
@@ -1390,6 +1391,8 @@ function load(){
   W = parseInt(W,10);
   imgchange = localStorage.getItem('imgchange_j');
   imgchange = parseInt(imgchange,10);
+  x = localStorage.getItem('x_j');
+  x = parseInt(x,10);
 
 }
 
@@ -1536,10 +1539,10 @@ function evaluation(){
                  // window.location.href = "market://details?id=アプリのパッケージ名"
 
                   // 通常の遷移
-                   //window.location.href = 'https://play.google.com/store?utm_source=apac_med&utm_medium=hasem&utm_content=Jul0119&utm_campaign=Evergreen&pcampaignid=MKT-DR-apac-jp-1003227-med-hasem-py-Evergreen-Jul0119-Text_Search_BKWS-BKWS%7cONSEM_kwid_43700012434507677_creativeid_114860667305_device_c_kwd_kwd-41753592129_geoid_1009332_network_g&gclid=CjwKCAjwsIbpBRBNEiwAZF8-z1AiReb943fcVv7VYVAGDv9jSDPt8BcDsZqnCyGJc3To6YB0EL1cmBoCmWQQAvD_BwE&gclsrc=aw.ds';
+                   //window.location.href = 'https://play.google.com/store?utm_source=apac_med&utm_medium=hasem&utm_content=Jul0119&utm_campaign=Evergreen&pcampaignid=MKT-DR-apac-jp-1003227-med-hasem-py-Evergreen-Jul0119-Text_Search_BKWS-BKWS%7cONSEM_kwid_43700012434507677_creativeid_114860667305_device_c_kwd_kwd-41753592129_geoid_1009332_network_g&gclid=CjwKCAjwsIbpBRBNEiwAZF8-z1AiReb943fcVv7VYVAGDv9jSDPt8BcDsZqnCyGJc3To6YB0EL1cmBoCmWQQAvD_BwE&gclsrc=aw.ds'; 
 
                   //新しいタブを開き、ページを表示
-                  window.open('https://play.google.com/store/apps/details?id=jp.ac.iwasaki.isc.secwerewolf', '_blank');
+                  window.open('https://play.google.com/store/apps/details?id=jp.ac.iwasaki.isc.secwerewolf', '_blank'); 
                  }
                  })
                  .catch((error) => {
@@ -1634,7 +1637,7 @@ function evaluation(){
             <br/>
             <br/>
             <ons-button id="bluebutton" class="page3_button" onclick="evaluation()">レビュー</ons-button>
-
+  
             <!--<div id="syousaisettei"></div>
             <br />
             <ons-button id="push-button" class="page3_button" onclick="op_4()">利用規約</ons-button>
@@ -1651,7 +1654,7 @@ function evaluation(){
       <div id="right"><ons-button id="right-button" onClick="document.querySelector('#navigator').resetToPage('page1.html',{ animation: 'fade'});">TITLE</ons-button></div>
       <div class="content" style="text-align: center">
         <h2>プレイヤーセット</h2>
-
+      
         <!--
         <p><ons-button id="push-button2" onClick="document.querySelector('#navigator').pushPage('page8.html');">プレイヤー追加</ons-button>
         <ons-button id="push-button" onClick="document.querySelector('#navigator').pushPage('page4.html');">人数確定</ons-button></p>-->
@@ -1664,7 +1667,7 @@ function evaluation(){
         <br />
         <div id="namelist_page8" name="namelist_page8" ></div>
         <br />
-
+        
         <ons-button id="page3_reset" onclick="reset()">クリア</ons-button>
         <ons-button id="page3_reset" onclick="redraw_page4()">次へ</ons-button>
         <br/>
@@ -2311,10 +2314,10 @@ function evaluation(){
         <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
             <ons-button id="back-button" onClick="document.querySelector('#navigator').popPage();">back</ons-button>
       <div class="tutorial">
-
+      
         <br/>
         <table bgColor="#ffffff" id="tutorial_TB"><tr><td>
-                <h2>著作権情報</h2>
+                <h2>著作権情報</h2>  
           <p id="futosi">アシアル株式会社</p>
           <p>COPYRIGHT ASIAL CORPORATION. ALL RIGHTS RESERVED.</p>
 
@@ -2334,7 +2337,7 @@ function evaluation(){
 
           <p id="futosi">Onsen UI</p>
           <p>COPYRIGHT ASIAL CORPORATION. ALL RIGHTS RESERVED</p>
-
+          
             <p id="futosi">Apache License</p>
             <p>Copyright 2019 © IWASAKI GAKUEN. ALL RIGHTS RESERVED.</p>
             <samp>
@@ -2350,7 +2353,7 @@ function evaluation(){
               See the License for the specific language governing permissions and
               limitations under the License.
             </samp>
-
+          
 
         </table>
 <br/>
@@ -2393,10 +2396,10 @@ function evaluation(){
         <div id="background_image" class="page__background" style="background-image:url('image/haikei2.png');"></div>
             <ons-button id="back-button" onClick="document.querySelector('#navigator').popPage();">back</ons-button>
       <div class="tutorial">
-
+        
         <br/>
         <table bgColor="#ffffff" id="tutorial_TB"><tr><td>
-<h2>利用規約</h2>
+<h2>利用規約</h2>      
 
 <p>セキュリティ専門家人狼アプリ 利用規約</p>
 <samp>　本利用規約（以下「本規約」といいます）は、情報科学専門学校（以下「開発者」といいます）が本アプリを提供するサービスの利用条件を定めるものです。<br/>　利用者は本サービスを利用することにより、本規約に同意したものとみなします。<br/>
@@ -2512,3 +2515,4 @@ function evaluation(){
 
 </body>
 </html>
+
