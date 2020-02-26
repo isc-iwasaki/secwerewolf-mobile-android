@@ -10,6 +10,7 @@
 <script src="js/dialog.js"></script>
 <script type="text/javascript" src="jquery.balloon.min.js"></script>
 <script src="js/LocalStorage.js"></script>
+<script src="encoding.js"></script>
 
   <link rel="stylesheet" href="components/loader.css">
   <link rel="stylesheet" href="lib/onsenui/css/onsenui.css">
@@ -20,6 +21,9 @@
   <script>
 //メッセージウィンドウ設定
 var notifyAlert = function(title,msg) {
+  if(chkValidation(title)==false || chkValidation(msg)==false){
+    endIllegalValue();
+  }
   ons.notification.alert({
     message: msg,
     title: title
@@ -27,6 +31,9 @@ var notifyAlert = function(title,msg) {
 };
 
 var notifyConfirm = function(title,msg) {
+  if(chkValidation(title)==false || chkValidation(msg)==false){
+    endIllegalValue();
+  }
   return(ons.notification.confirm({
     message: msg,
     title: title
@@ -126,6 +133,9 @@ var notifyConfirm = function(title,msg) {
             var hoge = document.createElement("div");
 
             hoge.addEventListener("click", function(event) {
+                if(chkValidation(event.target.textContent)==false){
+                  endIllegalValue();
+                }
                 answer=confirm(event.target.textContent + "を削除しますか？");
                 if(answer==true){
                     _delete_child_element(event);
@@ -133,7 +143,7 @@ var notifyConfirm = function(title,msg) {
                 }, false);
 
             hoge.id = "name_" + i;
-            hoge.innerHTML = names[i];
+            valInnerHTML(hoge,names[i]);
             document.getElementById("namelist_page8").appendChild(hoge);
 
         }
@@ -149,7 +159,6 @@ var notifyConfirm = function(title,msg) {
 
                 //プレイヤー選択削除
                 hoge.addEventListener("click", function(event) {
-
                   promise=notifyConfirm("プレイヤー削除",event.target.textContent + " を削除しますか？");
                   promise
                     .then((result) => {
@@ -168,7 +177,7 @@ var notifyConfirm = function(title,msg) {
 
 
             hoge.id = "name_" + x;
-            hoge.innerHTML = names[x];
+            valInnerHTML(hoge,names[x]);
             document.getElementById("namelist_page8").appendChild(hoge);
             x=x+1;
             //Pname.innerText = document.forms.form1.textBox1.value;
@@ -226,6 +235,8 @@ var notifyConfirm = function(title,msg) {
              notifyAlert('エラー','同名は使えません');
         }else if(names.length >= 20){
           notifyAlert('エラー','人数は20人が上限です');
+        }else if(chkValidation(name.value)==false){
+             notifyAlert('エラー','名前に使用できない記号が含まれています');
         }else{
             //特殊記号の置換
             escape_name = (name.value);
@@ -242,15 +253,16 @@ function escape_html(targetValue) {
   if (targetValue === null || targetValue === undefined) {
      return "";
   }
-  return String(targetValue)
-     .replace(/&/g, '&amp;')
-     .replace(/"/g, '"')
-     .replace(/'/g, "'")
-     .replace(/`/g, "`")
-     .replace(/</g, "<")
-     .replace(/>/g, ">");
+  // var retstr = String(targetValue)
+  //    .replace(/&/g, '&amp;')
+  //    .replace(/"/g, '"')
+  //    .replace(/'/g, "'")
+  //    .replace(/`/g, "`")
+  //    .replace(/</g, "<")
+  //    .replace(/>/g, ">");
+  // return retstr;
+  return targetValue;
 }
-
 
     //プレイヤー確定設定
     async function redraw_page4(){
@@ -261,7 +273,7 @@ function escape_html(targetValue) {
             murabito_num = names.length - 1;
             await document.querySelector('#navigator').pushPage('page4.html',{ animation: "fade" });
             change();//イラストの変更
-            document.getElementById('murabitonum').innerHTML = murabito_num;
+            valInnerHTML(document.getElementById('murabitonum'),murabito_num);
             bousyoku_num = 1;
             uranai_num = 0;
             reibai_num = 0;
@@ -277,12 +289,12 @@ function escape_html(targetValue) {
     function addmurabito(){
         murabito_num=murabito_num-1;
         var murabitonum = document.getElementById('murabitonum');
-        murabitonum.innerHTML = murabito_num;
+        valInnerHTML(murabitonum,murabito_num);
         if(murabito_num <= 0){
            //alert('ノーティフィケーションは最低1人です');
             murabito_num=murabito_num + 1;
             var murabitonum = document.getElementById('murabitonum');
-            murabitonum.innerHTML = murabito_num;
+            valInnerHTML(murabitonum,murabito_num);
         }
     }
 
@@ -292,7 +304,7 @@ function escape_html(targetValue) {
       }else{
         murabito_num=murabito_num+1;
         var murabitonum = document.getElementById('murabitonum');
-        murabitonum.innerHTML = murabito_num;
+        valInnerHTML(murabitonum,murabito_num);
       }
     }
 
@@ -302,8 +314,8 @@ function escape_html(targetValue) {
             bousyoku_num=bousyoku_num+1;
             murabito_num = murabito_num -1;
             var bousyoku = document.getElementById('bousyokunum');
-            bousyokunum.innerHTML = bousyoku_num;
-            document.getElementById("murabitonum").innerHTML=murabito_num;
+            valInnerHTML(bousyokunum,bousyoku_num);
+            valInnerHTML(document.getElementById("murabitonum"),murabito_num);
         }
     }
 
@@ -312,8 +324,8 @@ function escape_html(targetValue) {
       bousyoku_num = bousyoku_num - 1;
       murabito_num = murabito_num + 1;
         var bousyoku = document.getElementById('bousyokunum');
-        bousyoku.innerHTML = bousyoku_num;
-        document.getElementById("murabitonum").innerHTML=murabito_num;
+        valInnerHTML(bousyoku,bousyoku_num);
+        valInnerHTML(document.getElementById("murabitonum"),murabito_num);
       }
     }
 
@@ -322,8 +334,8 @@ function escape_html(targetValue) {
       if(1 < murabito_num & uranai_num < 2){
       uranai_num = uranai_num+1;
       murabito_num = murabito_num - 1;
-      document.getElementById("uranainum").innerHTML= uranai_num;
-      document.getElementById("murabitonum").innerHTML = murabito_num;
+      valInnerHTML(document.getElementById("uranainum"),uranai_num);
+      valInnerHTML(document.getElementById("murabitonum"),murabito_num);
       }
     }
 
@@ -331,8 +343,8 @@ function escape_html(targetValue) {
       if(0< uranai_num){
         uranai_num = uranai_num -1;
         murabito_num = murabito_num+1;
-        document.getElementById("uranainum").innerHTML = uranai_num;
-        document.getElementById("murabitonum").innerHTML = murabito_num;
+        valInnerHTML(document.getElementById("uranainum"),uranai_num);
+        valInnerHTML(document.getElementById("murabitonum"),murabito_num);
       }
     }
 
@@ -341,8 +353,8 @@ function escape_html(targetValue) {
       if(1 < murabito_num & kisi_num <2){
       kisi_num= kisi_num+1;
       murabito_num = murabito_num - 1;
-      document.getElementById("kisi").innerHTML= kisi_num;
-      document.getElementById("murabitonum").innerHTML = murabito_num;
+      valInnerHTML(document.getElementById("kisi"),kisi_num);
+      valInnerHTML(document.getElementById("murabitonum"),murabito_num);
       }
     }
 
@@ -350,8 +362,8 @@ function escape_html(targetValue) {
       if(0< kisi_num){
         kisi_num = kisi_num -1;
         murabito_num = murabito_num+1;
-        document.getElementById("kisi").innerHTML = kisi_num;
-        document.getElementById("murabitonum").innerHTML = murabito_num;
+        valInnerHTML(document.getElementById("kisi"),kisi_num);
+        valInnerHTML(document.getElementById("murabitonum"),murabito_num);
       }
     }
 
@@ -360,8 +372,8 @@ function escape_html(targetValue) {
       if(1 < murabito_num & reibai_num < 2){
       reibai_num= reibai_num+1;
       murabito_num = murabito_num - 1;
-      document.getElementById("reibai").innerHTML= reibai_num;
-      document.getElementById("murabitonum").innerHTML = murabito_num;
+      valInnerHTML(document.getElementById("reibai"),reibai_num);
+      valInnerHTML(document.getElementById("murabitonum"),murabito_num);
       }
     }
 
@@ -369,8 +381,8 @@ function escape_html(targetValue) {
       if(0< reibai_num){
         reibai_num = reibai_num -1;
         murabito_num = murabito_num+1;
-        document.getElementById("reibai").innerHTML = reibai_num;
-        document.getElementById("murabitonum").innerHTML = murabito_num;
+        valInnerHTML(document.getElementById("reibai"),reibai_num);
+        valInnerHTML(document.getElementById("murabitonum"),murabito_num);
       }
     }
 
@@ -379,8 +391,8 @@ function escape_html(targetValue) {
       if(1 < murabito_num & kyoujin_num < 2){
       kyoujin_num = kyoujin_num+1;
       murabito_num = murabito_num - 1;
-      document.getElementById("kyoujin").innerHTML= kyoujin_num;
-      document.getElementById("murabitonum").innerHTML = murabito_num;
+      valInnerHTML(document.getElementById("kyoujin"),kyoujin_num);
+      valInnerHTML(document.getElementById("murabitonum"),murabito_num);
       }
     }
 
@@ -388,8 +400,8 @@ function escape_html(targetValue) {
       if(0< kyoujin_num){
         kyoujin_num = kyoujin_num -1;
         murabito_num = murabito_num+1;
-        document.getElementById("kyoujin").innerHTML = kyoujin_num;
-        document.getElementById("murabitonum").innerHTML = murabito_num;
+        valInnerHTML(document.getElementById("kyoujin"),kyoujin_num);
+        valInnerHTML(document.getElementById("murabitonum"),murabito_num);
       }
     }
 
@@ -456,6 +468,7 @@ function escape_html(targetValue) {
          notifyAlert('エラー','汚職者に対してCSIRT側の数が足りません。再設定してください。');
       }else{
         await document.querySelector('#navigator').pushPage('page5.html',{ animation: "fade" });
+        chkJobNum(jobnum);
         document.getElementById( "haibun" ).innerHTML="<p>役職</br>汚職者　" + jobnum[0] + "</br>ノーティフィケーション　" + jobnum[1] + "</br>フォレンジックエンジニア　" + jobnum[2] + "</br>リサーチャー　"+ jobnum[3] +"</br>コマンダー　"+ jobnum[4]  +"</br>ブラックハットハッカー　" + jobnum[5] + "</p>";
       }
     }
@@ -502,13 +515,12 @@ function escape_html(targetValue) {
         }
         i = 0;
       await document.querySelector('#navigator').pushPage('page5.html',{ animation: "fade" });
-
-      document.getElementById("haibun_murabito").innerHTML =murabito_num;
-      document.getElementById("haibun_osyokusya").innerHTML =bousyoku_num;
-      document.getElementById("haibun_uranai").innerHTML =uranai_num;
-      document.getElementById("haibun_reibai").innerHTML =reibai_num;
-      document.getElementById("haibun_kisi").innerHTML =kisi_num;
-      document.getElementById("haibun_kyoujin").innerHTML =kyoujin_num;
+      valInnerHTML(document.getElementById("haibun_murabito"),murabito_num);
+      valInnerHTML(document.getElementById("haibun_osyokusya"),bousyoku_num);
+      valInnerHTML(document.getElementById("haibun_uranai"),uranai_num);
+      valInnerHTML(document.getElementById("haibun_reibai"),reibai_num);
+      valInnerHTML(document.getElementById("haibun_kisi"),kisi_num);
+      valInnerHTML(document.getElementById("haibun_kyoujin"),kyoujin_num);
 
     }
   }
@@ -531,7 +543,7 @@ function escape_html(targetValue) {
       save();
       ordinal();
         await document.querySelector('#navigator').resetToPage('page17.html',{ animation: "fade" });
-        document.getElementById('page17_night').innerHTML = night+("日目の夜になりました");
+        valInnerHTML(document.getElementById('page17_night'),night+("日目の夜になりました"));
     }
 
 
@@ -541,8 +553,11 @@ function escape_html(targetValue) {
         rdname = names[cal];
 
         await document.querySelector('#navigator').pushPage('page9.html',{ animation: "fade" });
+        if(chkValidation(night+night_ordinal)==false){
+          endIllegalValue();
+        }
         document.getElementById('morningset').innerHTML = ("The ")+night+night_ordinal+(" Night");
-        document.getElementById('page9_name').innerHTML = rdname;
+        valInnerHTML(document.getElementById('page9_name'),rdname);
     }
 
     //話し合い前の説明画面
@@ -555,12 +570,15 @@ function escape_html(targetValue) {
           } else {
               await document.querySelector('#navigator').resetToPage('page12.html',{ animation: "fade" });
                 if(page12_A==0){
-                  document.getElementById('gisei').innerHTML = ("内部不正が発見されました");
+                  valInnerHTML(document.getElementById('gisei'),("内部不正が発見されました"));
                   page12_A = 0;
                 }else if(page12_A==1){
-                  document.getElementById('gisei').innerHTML = ('昨晩解雇された人はいませんでした。');
+                  valInnerHTML(document.getElementById('gisei'),('昨晩解雇された人はいませんでした。'));
                   page12_A = 0;
                 }else{
+                  if(chkValidation(gisei)==false){
+                    endIllegalValue();
+                  }
                   document.getElementById('gisei').innerHTML = gisei + ('さんに解雇予告通知が出されました。');
                   document.getElementById('page12_text').innerHTML = ('以降 ' + gisei + ' さんは、ゲーム終了まで話してはいけません。');
                   page12_A = 0;
@@ -585,8 +603,11 @@ function escape_html(targetValue) {
             page6_name=0;
         }else{
         await document.querySelector('#navigator').resetToPage('page6.html',{ animation: "fade" });
+        if(chkValidation(night+night_ordinal)==false){
+          endIllegalValue();
+        }
         document.getElementById('nightset').innerHTML = ("The ")+night+night_ordinal+(" Night");
-        document.getElementById('page6_name').innerHTML = names[page6_name];
+        valInnerHTML(document.getElementById('page6_name'),names[page6_name]);
         //マーク
         }
     }
@@ -626,6 +647,9 @@ async function page6_ENTER(){
       if(p_num==0){
         for(var i=0; i<names.length;i++){
           if(job[i]==0 || names[i]==names[page6_name]){
+            if(chkValidation(names[i]==false)){
+              endIllegalValue();
+            }
             document.getElementById( "jinrou_nem" ).insertAdjacentHTML('afterbegin', '<p id="red">' + names[i] + '</p>');
           }
         }
@@ -633,7 +657,6 @@ async function page6_ENTER(){
 
       if(Fortune_switch == 1 && night == 1){
         if(p_num==2){
-          //document.getElementById( "page7_uranai" ).insertAdjacentHTML('afterbegin', '<p>調査する人を選択してください</p>');
           document.getElementById('push-button').style.visibility ="hidden";
           name_button_2();
         }
@@ -668,7 +691,7 @@ async function page6_ENTER(){
     //汚職者の処理
     function name_button_0(){
         var $namebutton = document.createElement( "BUTTON" );
-        $namebutton.textContent = names[v];
+        valTextContent($namebutton,names[v]);
         var ninzu=names.length;
         for (var i=0;i<ninzu;i++){
             if(job[i]==0 || ded[i]==1){
@@ -686,7 +709,7 @@ async function page6_ENTER(){
     function jinrou_bunnto(){
         var $nameButton = document.createElement( "BUTTON" );
         var name=names[v];
-        $nameButton.textContent = (name);
+        valTextContent($nameButton,(name));
         $nameButton.id=('push-button');
         (function(j){
             //ここからがnames[v]の番号が押された時の処理
@@ -713,7 +736,7 @@ async function page6_ENTER(){
     //ノーティフィケーション怪しい人投票
     function name_button_1(){
         var $namebutton = document.createElement( "BUTTON" );
-        $namebutton.textContent = names[v];
+        valTextContent($namebutton,names[v]);
         var ninzu=names.length;
         for (var i=0;i<ninzu;i++){
             if(names[i]==names[page6_name] || ded[i]==1){
@@ -731,7 +754,7 @@ async function page6_ENTER(){
     function touhyou_m(){
         var $nameButton = document.createElement( "BUTTON" );
         var name=names[v];
-        $nameButton.textContent = (name);
+        valTextContent($nameButton,(name));
         $nameButton.id=('push-button');
         (function(j){
             //ここからがnames[v]の番号が押された時の処理
@@ -761,7 +784,7 @@ async function page6_ENTER(){
     //プレイヤー分のボタン表示
     function name_button_2() {
         var $nameButton = document.createElement( "BUTTON" );
-        $nameButton.textContent = names[v];
+        valTextContent($nameButton,names[v]);
         var ninzu = names.length;
         for (var i=0;i<ninzu;i++){
             if(names[i]==names[page6_name] || ded[i]==1){
@@ -780,7 +803,7 @@ async function page6_ENTER(){
     function createChildElement() {
         var $nameButton = document.createElement( "BUTTON" );
         var name=names[v];
-        $nameButton.textContent = (name);
+        valTextContent($nameButton,(name));
         $nameButton.id=('push-button');
         if(p_num==2){
         (function(j){
@@ -812,12 +835,15 @@ async function page6_ENTER(){
     //リサーチャー怪しい人投票&死亡者陣営
     function name_button_3(){
         var $namebutton = document.createElement( "BUTTON" );
-        $namebutton.textContent = names[v];
+        valTextContent($namebutton,names[v]);
         var ninzu=names.length;
         var giseijob=0;
         document.getElementById( "page7_3_gisei" ).insertAdjacentHTML('afterbegin', '<p>今まで解雇された人</p>');
         for (var i=0;i<ninzu;i++){
             if(ded[i]==1){
+                if(chkValidation(names[i]==false)){
+                  endIllegalValue();
+                }
                 if(job[i]<1){
                     document.getElementById( "page7_3_giseisya" ).insertAdjacentHTML('afterbegin', '<p>' + names[i] + 'さん 汚職者側</p>');
                 }else{
@@ -841,7 +867,7 @@ async function page6_ENTER(){
     function touhyou_r(){
         var $nameButton = document.createElement( "BUTTON" );
         var name=names[v];
-        $nameButton.textContent = (name);
+        valTextContent($nameButton,(name));
         $nameButton.id=('push-button');
         (function(j){
             //ここからがnames[v]の番号が押された時の処理
@@ -868,7 +894,7 @@ async function page6_ENTER(){
     //コマンダーの処理
     function name_button_4(){
         var $namebutton = document.createElement( "BUTTON" );
-        $namebutton.textContent = names[v];
+        valTextContent($namebutton,names[v]);
         var ninzu=names.length;
         for (var i=0;i<ninzu;i++){
             if(names[i]==names[page6_name] || ded[i]==1){
@@ -886,7 +912,7 @@ async function page6_ENTER(){
     function knight(){
         var $nameButton = document.createElement( "BUTTON" );
         var name=names[v];
-        $nameButton.textContent = (name);
+        valTextContent($nameButton,(name));
         $nameButton.id=('push-button');
         (function(j){
             //ここからがnames[v]の番号が押された時の処理
@@ -914,7 +940,7 @@ async function page6_ENTER(){
     //ブラックハットハッカー怪しい人投票
     function name_button_5(){
         var $namebutton = document.createElement( "BUTTON" );
-        $namebutton.textContent = names[v];
+        valTextContent($namebutton,names[v]);
         var ninzu=names.length;
         for (var i=0;i<ninzu;i++){
             if(names[i]==names[page6_name] || ded[i]==1){
@@ -932,7 +958,7 @@ async function page6_ENTER(){
     function touhyou_kyo(){
         var $nameButton = document.createElement( "BUTTON" );
         var name=names[v];
-        $nameButton.textContent = (name);
+        valTextContent($nameButton,(name));
         $nameButton.id=('push-button');
         (function(j){
             //ここからがnames[v]の番号が押された時の処理
@@ -1020,7 +1046,7 @@ async function page6_ENTER(){
     //殺害投票
     async function satugai_touhyou(){
         var $satugaiButton = document.createElement( "BUTTON" );
-        $satugaiButton.textContent = names[v];
+        valTextContent($satugaiButton,names[v]);
         var ninzu=names.length;
         for (var i=0;i<ninzu;i++){
             if(names[i]==names[AA] || ded[touhyou_ded]==1){
@@ -1038,11 +1064,11 @@ async function page6_ENTER(){
     }
     //殺害投票2
 function touhyou_satugai00(){
-   document.getElementById("touhyou00").innerHTML =  names[AA] + 'さんは誰に投票しますか？'
+   valInnerHTML(document.getElementById("touhyou00"),names[AA] + 'さんは誰に投票しますか？');
    var $satugaiButton = document.createElement( "BUTTON" );
    $satugaiButton.id = ('push-button');
    var name=names[v];
-   $satugaiButton.textContent = (name);
+   valTextContent($satugaiButton,(name));
    $satugaiButton.id=('push-button');
    (function(j){
        //ここからがnames[v]の番号が押された時の処理
@@ -1096,7 +1122,7 @@ function touhyou_satugai00(){
                 Fortune_switch = 2;
                 var i = 0;
                 var i = keltuka[ Math.floor( Math.random() * keltuka.length ) ]
-                document.getElementById( "satugaikeltuka" ).innerHTML =  '投票の結果'+names[i] +'さんが解雇されました';
+                valInnerHTML(document.getElementById( "satugaikeltuka" ),'投票の結果'+names[i] +'さんが解雇されました');
                 ded[i] = 1;
         //シーサート陣営または汚職者陣営の配列を参照し配列に1が立っていたらカウントを1減らす
                 if (Citizenbox[i] == 1){
@@ -1118,20 +1144,26 @@ function touhyou_satugai00(){
             if(Cntcitizen == Cntwolf + Cntmadman){
                 await document.querySelector('#navigator').pushPage('page15.html',{ animation: "fade" });
                 gamehantei = 1;
-                document.getElementById( "result" ).innerHTML =  'サイバー犯罪者陣営の勝利です';
+                valInnerHTML(document.getElementById( "result" ),'サイバー犯罪者陣営の勝利です');
                  var str = '';
                 for (var i = 0;i<names.length;i++) {
                     	str = str + '<p>' +names[i] + '：' + jobnames[i] + '</p>';
+                      if(chkValidation(names[i])==false || chkValidation(jobnames[i])==false){
+                        endIllegalValue();
+                      }
             	   }
             	document.getElementById('a').innerHTML = str;
                 }else if(Cntwolf == 0){
                  await document.querySelector('#navigator').pushPage('page15.html',{ animation: "fade" });
                 gamehantei = 1;
-                document.getElementById( "result" ).innerHTML =  'CSIRT陣営の勝利です';
+                valInnerHTML(document.getElementById( "result" ),'CSIRT陣営の勝利です');
                 var str = '';
 
                 for (var i = 0;i<names.length;i++) {
 	                	str = str + '<p>' +names[i] + '：' + jobnames[i] + '</p>';
+                      if(chkValidation(names[i])==false || chkValidation(jobnames[i])==false){
+                        endIllegalValue();
+                      }
             	}
             	document.getElementById('a').innerHTML = str;
                 }else if (gamehantei == 1){
@@ -1171,7 +1203,7 @@ function touhyou_satugai00(){
                 var i = 0;
                 var i = murabito_touhyou_keltuka[ Math.floor( Math.random()*murabito_touhyou_keltuka.length ) ]
                 //alert(i);
-                document.getElementById( "murabito_keltuka" ).innerHTML =  names[i] +'さんです';
+                valInnerHTML(document.getElementById( "murabito_keltuka" ),names[i] +'さんです');
                 S = 0;
     }else{
     W = 1;
@@ -1434,12 +1466,13 @@ async function op_1(){
   if(imgchange == 0){
     document.getElementById('image_set1').checked = false;
     document.getElementById('image_set2').checked = true;
-    document.getElementById('img_title').innerHTML = ("セキュ狼オリジナルイラスト");
+    valInnerHTML(document.getElementById('img_title'),("セキュ狼オリジナルイラスト"));
 
   }else{
     document.getElementById('image_set1').checked = true;
     document.getElementById('image_set2').checked = false;
-     document.getElementById('img_title').innerHTML = ("学生制作イラスト");
+    valInnerHTML(document.getElementById('img_title'),("学生制作イラスト"));
+
   }
 
 }
@@ -1466,12 +1499,12 @@ function test_clear(){
 
 function img_switch1(){
     imgchange = 1;
-     document.getElementById('img_title').innerHTML = ("学生制作イラスト");
+     valInnerHTML(document.getElementById('img_title'),("学生制作イラスト"));
      localStorage.setItem('imgchange_j',imgchange);
 }
 function img_switch2(){
     imgchange = 0;
-    document.getElementById('img_title').innerHTML = ("セキュ狼オリジナルイラスト");
+    valInnerHTML(document.getElementById('img_title'),("セキュ狼オリジナルイラスト"));
     localStorage.setItem('imgchange_j',imgchange);
 }
 
@@ -1550,6 +1583,72 @@ function evaluation(){
                  });
 }
 
+//有効な文字コードかチェック
+function chkEncoding(chkStr){
+  //有効な文字コード以外の文字が入力されている場合
+  var encStr = Encoding.detect(chkStr);
+  if(encStr == "ASCII" || encStr == "UNICODE" || encStr == "utf8"){
+    return true;
+  }
+  return false;
+}
+
+//制御文字を含むかチェック
+function chkCtrChar(chkStr){
+  var pattern  = /[\x00-\x20\x7F-\x9F]/;
+  return !(pattern.test(chkStr));
+}
+
+//記号を含むかチェック
+function chkSymbolChar(chkStr){
+  var pattern  = /[!"#$%&'()\*\+\-\.,\/:;<=>?@\[\\\]^_`{|}~]/;
+  return !(pattern.test(chkStr));
+}
+
+//有効な文字列かチェック
+function chkValidation(chkStr){
+  //文字エンコーディングチェック
+  if(chkEncoding(chkStr)==false){
+    return false;
+  }
+  //制御文字チェック
+  if(chkCtrChar(chkStr)==false){
+    return false;
+  }
+  //記号文字チェック
+  if(chkSymbolChar(chkStr)==false){
+    return false;
+  }
+  return true;
+}
+
+//バリデーションチェックを含んだHTML要素出力処理
+function endIllegalValue(){
+  notifyAlert('エラー','使用できない記号を検知しました。アプリを終了します');
+  navigator.app.exitApp();
+}
+
+function chkJobNum(jobnum){
+  for(var i=0;i<6;i++){
+    if(chkValidation(jobnum[i])==false){
+      endIllegalValue();
+    }
+  }
+}
+
+function valInnerHTML(setObj,setStr){
+  if(chkValidation(setStr)==false){
+    endIllegalValue();
+  }
+  setObj.innerHTML = setStr;
+}
+
+function valTextContent(setObj,setStr){
+  if(chkValidation(setStr)==false){
+    endIllegalValue();
+  }
+  setObj.textContent = setStr;
+}
   </script>
 </head>
 <body>
@@ -2325,7 +2424,7 @@ function evaluation(){
           <p>© いらすとや. All Rights Reserved.</p>
 
 
-          <p id="futosi">学校法人岩崎学園情報科学専門学園</p>
+          <p id="futosi">学校法人岩崎学園情報科学専門学校</p>
           <p>© IWASAKI GAKUEN. ALL RIGHTS RESERVED.</p>
 
           <p><p id="futosi">特定非営利活動法人日本ネットワークセキュリティ協会</p>
@@ -2338,6 +2437,9 @@ function evaluation(){
           <p id="futosi">Onsen UI</p>
           <p>COPYRIGHT ASIAL CORPORATION. ALL RIGHTS RESERVED</p>
           
+          <p id="futosi">encoding.js</p>
+          <p>COPYRIGHT polygonplanet. ALL RIGHTS RESERVED</p>
+
             <p id="futosi">Apache License</p>
             <p>Copyright 2019 © IWASAKI GAKUEN. ALL RIGHTS RESERVED.</p>
             <samp>
